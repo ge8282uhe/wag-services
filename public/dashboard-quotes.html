@@ -2932,12 +2932,20 @@
           <line x1="20" y1="4" x2="4" y2="20" />
         </svg>
       </button>
-      <a href="index.html" class="sidebar-brand flex items-center gap-2 mb-8">
-        <div style="width:32px;height:32px;border-radius:0.5rem;overflow:hidden">
-          <img src="logo.png" alt="WAG" style="width:100%;height:100%;object-fit:contain">
+      <a href="index.html" class="sidebar-brand flex items-center gap-3 mb-8" style="text-decoration:none">
+        <div
+          style="width:40px;height:40px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg, var(--brand-start), var(--brand-end));padding:2px">
+          <div
+            style="width:100%;height:100%;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center">
+            <img src="logo.png" alt="WAG" style="width:24px;height:24px;object-fit:contain">
+          </div>
         </div>
-        <span class="font-semibold" style="font-size:14px">WAG <span class="font-light"
-            style="color:var(--text-secondary)">services</span></span>
+        <div style="display:flex;flex-direction:column;line-height:1.2">
+          <span
+            style="font-size:16px;font-weight:600;background:linear-gradient(135deg, var(--brand-start), var(--brand-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">WAG</span>
+          <span
+            style="font-size:11px;font-weight:400;color:var(--text-tertiary);letter-spacing:0.08em;text-transform:uppercase">services</span>
+        </div>
       </a>
 
       <nav class="sidebar-nav">
