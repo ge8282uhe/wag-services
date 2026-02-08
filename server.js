@@ -28,6 +28,19 @@ app.use('/api/users', usersRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 
+// ─── Health check: test connessione DB (per capire errori in produzione) ─
+app.get('/api/health', async (req, res) => {
+  try {
+    const { getDb } = require('./src/config/database');
+    const db = getDb();
+    await db.get('SELECT 1');
+    res.json({ ok: true, db: 'connected' });
+  } catch (err) {
+    console.error('Health check error:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // ─── SPA Fallback: serve index.html per route non-API ─
 app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
