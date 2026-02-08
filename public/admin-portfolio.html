@@ -7,7 +7,6 @@
     <title>Portfolio | Admin WAG Services</title>
     <link rel="icon" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="gooey-nav.css">
     <style>
 /* WAG Services - Complete Styles */
 :root {
@@ -940,7 +939,6 @@ body {
 @media (max-width: 768px) {
 
   .nav-links,
-  .nav-links.gooey-nav-container,
   .nav-auth {
     display: none !important;
   }
@@ -1736,6 +1734,16 @@ body {
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
 }
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.sidebar-nav li { width: 100%; }
 
 .sidebar-profile {
   margin-top: auto;
@@ -2765,8 +2773,7 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
                         style="color:var(--text-secondary)">services</span></span>
             </a>
 
-            <div class="gooey-nav-container vertical">
-              <nav>
+            <nav class="sidebar-nav">
                 <ul>
                   <li>
                     <a href="admin.html" class="nav-link">
@@ -2786,6 +2793,8 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
                         style="margin-right:8px">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
                       Utenti
                     </a>
@@ -2813,10 +2822,7 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
                     </a>
                   </li>
                 </ul>
-              </nav>
-              <span class="effect filter" aria-hidden="true"></span>
-              <span class="effect text" aria-hidden="true"></span>
-            </div>
+            </nav>
 
             <div class="sidebar-profile">
                 <div class="flex items-center gap-3 mb-4">
@@ -2936,7 +2942,6 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('active');
-            if (sidebar.classList.contains('open')) setTimeout(function () { window.refreshGooeyNav && window.refreshGooeyNav(); }, 150);
         });
         sidebarOverlay.addEventListener('click', () => {
             sidebar.classList.remove('open');
@@ -3120,7 +3125,6 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
 
         loadPortfolio();
     </script>
-    <script src="gooey-nav.js"></script>
 </body>
 
 </html>
