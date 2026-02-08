@@ -2742,8 +2742,8 @@
     .folder-anchor {
       display: flex;
       justify-content: center;
-      margin-top: 3.5rem;
-      margin-bottom: 2.5rem;
+      margin-top: 5rem;
+      margin-bottom: 5rem;
     }
 
     .folder-wrapper {
@@ -2909,22 +2909,7 @@
       transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1);
     }
 
-    /* Portfolio collapse/expand */
-    .portfolio-grid {
-      overflow: hidden;
-      max-height: 2000px;
-      opacity: 1;
-      transform: translateY(0);
-      transition: max-height 0.6s ease, opacity 0.4s ease, transform 0.4s ease;
-    }
 
-    .portfolio-grid.is-collapsed {
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(10px);
-      pointer-events: none;
-      margin-top: 0 !important;
-    }
   </style>
 </head>
 
@@ -3122,56 +3107,7 @@
         </div>
       </div>
 
-      <div class="grid grid-2 mt-16 gap-6 portfolio-grid is-collapsed">
-        <a href="#" class="card portfolio-card">
-          <div class="portfolio-img"><img
-              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop&q=80"
-              alt="TechStore Pro" loading="lazy">
-            <div class="portfolio-overlay"></div>
-            <div class="portfolio-info"><span class="label-sm gradient-text">E-Commerce</span>
-              <h3 class="text-xl font-semibold mt-2">TechStore Pro</h3>
-              <p style="font-size:13px;font-weight:300;color:var(--text-secondary);margin-top:0.25rem">E-commerce tech
-                con catalogo headless, bundle dinamici e reportistica chiara.</p>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="card portfolio-card">
-          <div class="portfolio-img"><img
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop&q=80"
-              alt="FinanceFlow" loading="lazy">
-            <div class="portfolio-overlay"></div>
-            <div class="portfolio-info"><span class="label-sm gradient-text">Web App</span>
-              <h3 class="text-xl font-semibold mt-2">FinanceFlow</h3>
-              <p style="font-size:13px;font-weight:300;color:var(--text-secondary);margin-top:0.25rem">Dashboard fintech
-                con indicatori personalizzati, export PDF e ruoli granulari.</p>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="card portfolio-card">
-          <div class="portfolio-img"><img
-              src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=500&fit=crop&q=80"
-              alt="GreenLiving" loading="lazy">
-            <div class="portfolio-overlay"></div>
-            <div class="portfolio-info"><span class="label-sm gradient-text">Landing Page</span>
-              <h3 class="text-xl font-semibold mt-2">GreenLiving</h3>
-              <p style="font-size:13px;font-weight:300;color:var(--text-secondary);margin-top:0.25rem">Landing
-                climate-tech con copy misurato, moduli smart e A/B test continui.</p>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="card portfolio-card">
-          <div class="portfolio-img"><img
-              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=500&fit=crop&q=80"
-              alt="LegalPartners" loading="lazy">
-            <div class="portfolio-overlay"></div>
-            <div class="portfolio-info"><span class="label-sm gradient-text">Corporate</span>
-              <h3 class="text-xl font-semibold mt-2">LegalPartners</h3>
-              <p style="font-size:13px;font-weight:300;color:var(--text-secondary);margin-top:0.25rem">Sito corporate
-                multilingua con area clienti, knowledge base e CMS modulare.</p>
-            </div>
-          </div>
-        </a>
-      </div>
+
     </div>
   </section>
 
@@ -3891,7 +3827,6 @@
     (() => {
       const folderToggle = document.getElementById('folderToggle');
       const folderEl = document.getElementById('folderEl');
-      const grid = document.querySelector('.portfolio-grid');
       const hint = folderToggle.querySelector('.folder-hint');
       const papers = folderEl.querySelectorAll('.paper-link');
       let isOpen = false;
@@ -3900,7 +3835,6 @@
         if (event.target.closest('.paper-link')) return;
         isOpen = !isOpen;
         folderEl.classList.toggle('open', isOpen);
-        grid.classList.toggle('is-collapsed', !isOpen);
         hint.textContent = isOpen ? 'clicca per chiudere' : 'clicca per aprire';
         if (!isOpen) {
           papers.forEach(p => { p.style.setProperty('--mx', '0px'); p.style.setProperty('--my', '0px'); });
