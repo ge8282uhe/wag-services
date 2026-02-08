@@ -2737,6 +2737,174 @@
       position: relative;
       z-index: 1;
     }
+
+    /* ===== FOLDER COMPONENT ===== */
+    .folder-anchor {
+      display: flex;
+      justify-content: center;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .folder-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .folder-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      transition: opacity 0.3s;
+    }
+
+    .folder {
+      position: relative;
+      transition: transform 0.2s ease-in;
+    }
+
+    .folder:hover {
+      transform: translateY(-8px);
+    }
+
+    .folder:hover .folder__front {
+      transform: skew(15deg) scaleY(0.6);
+    }
+
+    .folder:hover .folder__front--right {
+      transform: skew(-15deg) scaleY(0.6);
+    }
+
+    .folder:hover .paper {
+      transform: translate(-50%, 0%);
+    }
+
+    .folder__back {
+      position: relative;
+      width: 100px;
+      height: 80px;
+      background: var(--folder-back);
+      border-radius: 0 10px 10px 10px;
+    }
+
+    .folder__back::after {
+      position: absolute;
+      z-index: 0;
+      bottom: 98%;
+      left: 0;
+      content: '';
+      width: 30px;
+      height: 10px;
+      background: var(--folder-back);
+      border-radius: 5px 5px 0 0;
+    }
+
+    .paper {
+      position: absolute;
+      z-index: 2;
+      bottom: 10%;
+      left: 50%;
+      transform: translate(calc(-50% + var(--mx, 0px)), calc(10% + var(--my, 0px)));
+      width: 70%;
+      height: 80%;
+      background: #e6e6e6;
+      border-radius: 10px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .paper:nth-child(2) {
+      background: #f2f2f2;
+      width: 80%;
+      height: 70%;
+    }
+
+    .paper:nth-child(3) {
+      background: #ffffff;
+      width: 90%;
+      height: 60%;
+    }
+
+    .folder__front {
+      position: absolute;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      background: var(--folder-color);
+      border-radius: 5px 10px 10px 10px;
+      transform-origin: bottom;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .folder__front--right {
+      position: absolute;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      background: var(--folder-color);
+      border-radius: 5px 10px 10px 10px;
+      transform-origin: bottom;
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Open state */
+    .folder.open {
+      transform: translateY(-8px);
+    }
+
+    .folder.open .folder__front {
+      transform: skew(15deg) scaleY(0.6);
+    }
+
+    .folder.open .folder__front--right {
+      transform: skew(-15deg) scaleY(0.6);
+    }
+
+    .folder.open .paper:nth-child(1) {
+      transform: translate(-120%, -70%) rotateZ(-15deg);
+    }
+
+    .folder.open .paper:nth-child(1):hover {
+      transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.1);
+    }
+
+    .folder.open .paper:nth-child(2) {
+      transform: translate(10%, -70%) rotateZ(15deg);
+      height: 80%;
+    }
+
+    .folder.open .paper:nth-child(2):hover {
+      transform: translate(10%, -70%) rotateZ(15deg) scale(1.1);
+    }
+
+    .folder.open .paper:nth-child(3) {
+      transform: translate(-50%, -100%) rotateZ(5deg);
+      height: 80%;
+    }
+
+    .folder.open .paper:nth-child(3):hover {
+      transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1);
+    }
+
+    /* Portfolio collapse/expand */
+    .portfolio-grid {
+      overflow: hidden;
+      max-height: 2000px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: max-height 0.6s ease, opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .portfolio-grid.is-collapsed {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      margin-top: 0 !important;
+    }
   </style>
 </head>
 
@@ -2912,7 +3080,25 @@
         <p class="max-w-lg mx-auto mt-4" style="font-size:15px;font-weight:300;color:var(--text-secondary)">Una
           selezione di lavori consegnati. Demo e dettagli tecnici disponibili su richiesta.</p>
       </div>
-      <div class="grid grid-2 mt-16 gap-6">
+      <!-- Folder Component -->
+      <div class="folder-anchor">
+        <div class="folder-wrapper" id="folderToggle">
+          <span class="label-sm gradient-text">Progetti</span>
+          <div class="folder" id="folderEl"
+            style="--folder-color:#8b5cf6;--folder-back:#7237e0;transform:scale(1.5)">
+            <div class="folder__back">
+              <div class="paper"></div>
+              <div class="paper"></div>
+              <div class="paper"></div>
+              <div class="folder__front"></div>
+              <div class="folder__front--right"></div>
+            </div>
+          </div>
+          <p class="folder-hint">clicca per aprire</p>
+        </div>
+      </div>
+
+      <div class="grid grid-2 mt-16 gap-6 portfolio-grid is-collapsed">
         <a href="#" class="card portfolio-card">
           <div class="portfolio-img"><img
               src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop&q=80"
@@ -3676,6 +3862,41 @@
         authDiv.innerHTML = '<a href="' + href + '" class="btn-primary py-2 px-5" style="font-size:12px">Area clienti</a>';
       }
     }
+
+    // ===== FOLDER COMPONENT =====
+    (() => {
+      const folderToggle = document.getElementById('folderToggle');
+      const folderEl = document.getElementById('folderEl');
+      const grid = document.querySelector('.portfolio-grid');
+      const hint = folderToggle.querySelector('.folder-hint');
+      const papers = folderEl.querySelectorAll('.paper');
+      let isOpen = false;
+
+      folderToggle.addEventListener('click', () => {
+        isOpen = !isOpen;
+        folderEl.classList.toggle('open', isOpen);
+        grid.classList.toggle('is-collapsed', !isOpen);
+        hint.textContent = isOpen ? 'clicca per chiudere' : 'clicca per aprire';
+        if (!isOpen) {
+          papers.forEach(p => { p.style.setProperty('--mx', '0px'); p.style.setProperty('--my', '0px'); });
+        }
+      });
+
+      papers.forEach((paper, i) => {
+        paper.addEventListener('mousemove', (e) => {
+          if (!isOpen) return;
+          const rect = paper.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          paper.style.setProperty('--mx', ((e.clientX - cx) * 0.15) + 'px');
+          paper.style.setProperty('--my', ((e.clientY - cy) * 0.15) + 'px');
+        });
+        paper.addEventListener('mouseleave', () => {
+          paper.style.setProperty('--mx', '0px');
+          paper.style.setProperty('--my', '0px');
+        });
+      });
+    })();
 
     // ===== CURSOR GLOW (optional, can be disabled for performance) =====
     const cursorGlow = document.createElement('div');

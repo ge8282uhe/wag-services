@@ -3,3 +3,4 @@ data/database.sqlite
 .env
 *.log
 .DS_Store
+.next/
