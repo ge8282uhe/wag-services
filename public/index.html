@@ -777,10 +777,11 @@
     .text-shimmer {
       background: linear-gradient(90deg, var(--brand-start), var(--brand-mid), var(--brand-end), var(--brand-start));
       background-size: 300% 100%;
+      background-position: 50% 50%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: textShimmer 4s infinite linear;
+      animation: none;
     }
 
     /* Stagger children animations */
@@ -3826,13 +3827,15 @@
       var W, H;
 
       function resize() {
+        var dpr = window.devicePixelRatio || 1;
         W = window.innerWidth;
         H = window.innerHeight;
-        canvas.width = W * (window.devicePixelRatio || 1);
-        canvas.height = H * (window.devicePixelRatio || 1);
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
         canvas.style.width = W + 'px';
         canvas.style.height = H + 'px';
-        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
       }
       window.addEventListener('resize', resize);
       resize();
@@ -3889,12 +3892,23 @@
 
           var screenX = p.x * W;
           var screenY = p.y * H;
-          var radius = p.z * (1.4 + p.glow * 1.6);
-          var alpha = p.z * 0.35 + p.glow * 0.65;
+          var coreRadius = p.z * (1.2 + p.glow * 1.4);
+          var haloRadius = coreRadius * (2.2 + p.glow * 1.2);
+          var coreAlpha = Math.min(1, 0.2 + p.z * 0.35 + p.glow * 0.55);
+          var haloAlpha = 0.05 + p.glow * 0.25;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(screenX, screenY, haloRadius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,' + haloAlpha + ')';
+          ctx.shadowBlur = haloRadius * 2.5;
+          ctx.shadowColor = 'rgba(255,255,255,' + (haloAlpha + 0.1) + ')';
+          ctx.fill();
+          ctx.restore();
 
           ctx.beginPath();
-          ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+          ctx.arc(screenX, screenY, coreRadius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,' + coreAlpha + ')';
           ctx.fill();
         }
       }
