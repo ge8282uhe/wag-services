@@ -1,13 +1,22 @@
 const path = require('path');
 
-const dbConfig = {
-  host: process.env.DB_HOST || process.env.MYSQL_HOST || process.env.DATABASE_HOST,
-  user: process.env.DB_USER || process.env.MYSQL_USER || process.env.DATABASE_USER,
-  password: process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || process.env.DATABASE_PASSWORD,
-  database: process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.DATABASE_NAME,
+// ─── Credenziali MySQL Hostinger (hardcoded come fallback) ───
+const MYSQL_DEFAULTS = {
+  host: '127.0.0.1',
+  user: 'u825008747_tronco',
+  password: 'Tronco2007@',
+  database: 'u825008747_wagservices',
 };
 
-const useMySQL = !!(dbConfig.host || dbConfig.database || dbConfig.user);
+const dbConfig = {
+  host: process.env.DB_HOST || MYSQL_DEFAULTS.host,
+  user: process.env.DB_USER || MYSQL_DEFAULTS.user,
+  password: process.env.DB_PASSWORD || MYSQL_DEFAULTS.password,
+  database: process.env.DB_NAME || MYSQL_DEFAULTS.database,
+};
+
+// Forza SEMPRE MySQL (ignora SQLite in produzione)
+const useMySQL = true;
 
 let sqliteDb;
 let mysqlPool;
