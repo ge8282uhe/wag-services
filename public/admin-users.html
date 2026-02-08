@@ -2007,7 +2007,9 @@ tr:hover {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 44;
 }
 
@@ -2026,6 +2028,10 @@ tr:hover {
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     z-index: 45;
+    background: rgba(13, 10, 11, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid var(--border-subtle);
   }
 
   .sidebar.open {
@@ -2034,9 +2040,32 @@ tr:hover {
 
   .main-content {
     margin-left: 0;
-    padding: 1rem;
-    padding-top: 4.5rem;
+    padding: 0.75rem;
+    padding-top: 3.25rem;
   }
+
+  .main-content .heading-lg { font-size: 1.25rem; }
+  .main-content .label-sm { margin-bottom: 0.15rem; }
+  .main-content .grid.gap-3 { gap: 0.5rem; }
+  .main-content .grid.mt-8 { margin-top: 1.25rem; }
+  .main-content .grid.mt-6 { margin-top: 1rem; }
+  .main-content .stat-card { padding: 1rem; }
+  .main-content .stat-value { font-size: 1.25rem; }
+  .main-content .card { padding: 1rem; }
+  .main-content .mt-6 { margin-top: 1rem; }
+  .main-content .mt-8 { margin-top: 1.25rem; }
+  .main-content table { font-size: 12px; }
+  .main-content th, .main-content td { padding: 0.5rem 0.6rem; }
+}
+
+@media (max-width: 480px) {
+  .main-content { padding: 0.5rem; padding-top: 3rem; }
+  .main-content .grid.grid-4 { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .main-content .grid.grid-2 { grid-template-columns: 1fr; }
+  .main-content .stat-value { font-size: 1.1rem; }
+  .sidebar { width: 280px; padding: 1rem; }
+  .sidebar-brand { padding: 0.4rem 0.5rem; margin-bottom: 1rem; }
+  .sidebar-nav .nav-link { padding: 0.5rem 0.6rem; font-size: 13px; }
 }
 
 /* ========================================
