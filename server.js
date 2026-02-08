@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const next = require('next');
 require('dotenv').config();
 
 const { initDatabase } = require('./src/db/init');
@@ -12,13 +13,16 @@ const portfolioRoutes = require('./src/routes/portfolio');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({ dev });
+const handle = nextApp.getRequestHandler();
 
 // ─── Middleware ───────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 
 // ─── Static files (public/) ──────────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // ─── API Routes ──────────────────────────────────────
 app.use('/api/login', authRoutes.login);
@@ -41,20 +45,29 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// ─── Error handler globale ─────────────────────────
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Errore interno del server' });
-});
+nextApp.prepare().then(() => {
+  // ─── Next.js routes ────────────────────────────────
+  app.get('/', (req, res) => nextApp.render(req, res, '/'));
 
-// ─── Inizializza DB (solo SQLite; con MySQL usi database importato in phpMyAdmin) ─
-const useMySQL = !!(process.env.DB_HOST || process.env.DB_NAME);
-if (!useMySQL) {
-  initDatabase();
-}
+  // ─── Next.js assets & fallback ─────────────────────
+  app.all(/^\/\_next\//, (req, res) => handle(req, res));
+  app.all(/.*/, (req, res) => handle(req, res));
 
-app.listen(PORT, () => {
-  console.log(`\n  🚀 WAG Services server attivo`);
-  console.log(`  ➜ Local:   http://localhost:${PORT}`);
-  console.log(`  ➜ API:     http://localhost:${PORT}/api\n`);
+  // ─── Error handler globale ─────────────────────────
+  app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Errore interno del server' });
+  });
+
+  // ─── Inizializza DB (solo SQLite; con MySQL usi database importato in phpMyAdmin) ─
+  const useMySQL = !!(process.env.DB_HOST || process.env.DB_NAME);
+  if (!useMySQL) {
+    initDatabase();
+  }
+
+  app.listen(PORT, () => {
+    console.log(`\n  🚀 WAG Services server attivo`);
+    console.log(`  ➜ Local:   http://localhost:${PORT}`);
+    console.log(`  ➜ API:     http://localhost:${PORT}/api\n`);
+  });
 });

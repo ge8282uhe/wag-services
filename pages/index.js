@@ -1,7 +1,8 @@
 import Head from 'next/head';
-import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useState } from 'react';
-import Folder from '../components/Folder';
+import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
+
+const Particles = dynamic(() => import('../components/Particles'), { ssr: false });
 
 export async function getServerSideProps() {
   const fs = require('fs');
@@ -22,187 +23,39 @@ export async function getServerSideProps() {
     bodyHtml = bodyHtml.replace(scriptMatch[0], '');
   }
 
-  bodyHtml = bodyHtml.replace(
-    '<div class="grid grid-2 mt-16 gap-6">',
-    '<div id="folder-anchor" class="folder-anchor"></div>\n      <div class="grid grid-2 mt-16 gap-6 portfolio-grid is-collapsed">'
-  );
-
-  const folderCss = `
-.folder {
-  transition: all 0.2s ease-in;
-  cursor: pointer;
-}
-
-.folder:not(.folder--click):hover {
-  transform: translateY(-8px);
-}
-
-.folder:not(.folder--click):hover .paper {
-  transform: translate(-50%, 0%);
-}
-
-.folder:not(.folder--click):hover .folder__front {
-  transform: skew(15deg) scaleY(0.6);
-}
-
-.folder:not(.folder--click):hover .right {
-  transform: skew(-15deg) scaleY(0.6);
-}
-
-.folder.open {
-  transform: translateY(-8px);
-}
-
-.folder.open .paper:nth-child(1) {
-  transform: translate(-120%, -70%) rotateZ(-15deg);
-}
-
-.folder.open .paper:nth-child(1):hover {
-  transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.1);
-}
-
-.folder.open .paper:nth-child(2) {
-  transform: translate(10%, -70%) rotateZ(15deg);
-  height: 80%;
-}
-
-.folder.open .paper:nth-child(2):hover {
-  transform: translate(10%, -70%) rotateZ(15deg) scale(1.1);
-}
-
-.folder.open .paper:nth-child(3) {
-  transform: translate(-50%, -100%) rotateZ(5deg);
-  height: 80%;
-}
-
-.folder.open .paper:nth-child(3):hover {
-  transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1);
-}
-
-.folder.open .folder__front {
-  transform: skew(15deg) scaleY(0.6);
-}
-
-.folder.open .right {
-  transform: skew(-15deg) scaleY(0.6);
-}
-
-.folder__back {
-  position: relative;
-  width: 100px;
-  height: 80px;
-  background: var(--folder-back-color);
-  border-radius: 0px 10px 10px 10px;
-}
-
-.folder__back::after {
-  position: absolute;
+  const particlesCss = `
+.particles-bg {
+  position: fixed;
+  inset: 0;
   z-index: 0;
-  bottom: 98%;
-  left: 0;
-  content: '';
-  width: 30px;
-  height: 10px;
-  background: var(--folder-back-color);
-  border-radius: 5px 5px 0 0;
+  pointer-events: none;
 }
 
-.paper {
-  position: absolute;
-  z-index: 2;
-  bottom: 10%;
-  left: 50%;
-  transform: translate(calc(-50% + var(--magnet-x, 0px)), calc(10% + var(--magnet-y, 0px)));
-  width: 70%;
-  height: 80%;
-  background: var(--paper-1);
-  border-radius: 10px;
-  transition: all 0.3s ease-in-out;
-}
-
-.paper:nth-child(2) {
-  background: var(--paper-2);
-  width: 80%;
-  height: 70%;
-}
-
-.paper:nth-child(3) {
-  background: var(--paper-3);
-  width: 90%;
-  height: 60%;
-}
-
-.folder__front {
-  position: absolute;
-  z-index: 3;
+.particles-bg > div {
   width: 100%;
   height: 100%;
-  background: var(--folder-color);
-  border-radius: 5px 10px 10px 10px;
-  transform-origin: bottom;
-  transition: all 0.3s ease-in-out;
 }
 
-.folder-anchor {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+.particles-bg canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.folder-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.folder-hint {
-  font-size: 12px;
-  color: var(--text-tertiary);
-}
-
-.portfolio-grid {
-  overflow: hidden;
-  max-height: 2000px;
-  opacity: 1;
-  transform: translateY(0);
-  transition: max-height 0.5s ease, opacity 0.35s ease, transform 0.35s ease;
-}
-
-.portfolio-grid.is-collapsed {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  margin-top: 0 !important;
+.aurora-bg {
+  display: none !important;
 }
 `;
 
   return {
     props: {
       bodyHtml,
-      combinedCss: `${baseCss}\n${folderCss}`,
+      combinedCss: `${baseCss}\n${particlesCss}`,
       scriptContent,
     },
   };
 }
 
 const HomePage = ({ bodyHtml, combinedCss, scriptContent }) => {
-  const [folderOpen, setFolderOpen] = useState(false);
-  const [portalTarget, setPortalTarget] = useState(null);
-
-  useEffect(() => {
-    setPortalTarget(document.getElementById('folder-anchor'));
-  }, []);
-
-  useEffect(() => {
-    const grid = document.querySelector('.portfolio-grid');
-    if (grid) {
-      grid.classList.toggle('is-collapsed', !folderOpen);
-    }
-  }, [folderOpen]);
-
   useEffect(() => {
     if (!scriptContent) return;
     const script = document.createElement('script');
@@ -212,23 +65,6 @@ const HomePage = ({ bodyHtml, combinedCss, scriptContent }) => {
       document.body.removeChild(script);
     };
   }, [scriptContent]);
-
-  const folderNode = useMemo(() => {
-    if (!portalTarget) return null;
-    return createPortal(
-      <div className="folder-wrapper">
-        <span className="label-sm gradient-text">Progetti</span>
-        <Folder
-          size={1.5}
-          color="#8b5cf6"
-          onToggle={(open) => setFolderOpen(open)}
-          className="custom-folder"
-        />
-        <p className="folder-hint">Apri la cartella per vedere i progetti</p>
-      </div>,
-      portalTarget
-    );
-  }, [portalTarget]);
 
   return (
     <>
@@ -248,8 +84,20 @@ const HomePage = ({ bodyHtml, combinedCss, scriptContent }) => {
         />
         <style dangerouslySetInnerHTML={{ __html: combinedCss }} />
       </Head>
+      <div className="particles-bg" aria-hidden="true">
+        <Particles
+          particleColors={["#ffffff"]}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={1}
+        />
+      </div>
       <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-      {folderNode}
     </>
   );
 };
