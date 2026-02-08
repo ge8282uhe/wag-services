@@ -34,7 +34,20 @@ app.get('/api/health', async (req, res) => {
     const { getDb } = require('./src/config/database');
     const db = getDb();
     await db.get('SELECT 1');
-    res.json({ ok: true, db: 'connected' });
+    res.json({
+      ok: true,
+      db: 'connected',
+      dbTarget: useMySQL
+        ? {
+            type: 'mysql',
+            host: process.env.DB_HOST || 'localhost',
+            database: process.env.DB_NAME || null,
+          }
+        : {
+            type: 'sqlite',
+            path: process.env.DB_PATH || path.join(__dirname, 'data', 'database.sqlite'),
+          },
+    });
   } catch (err) {
     console.error('Health check error:', err);
     res.status(500).json({ ok: false, error: err.message });
@@ -57,4 +70,9 @@ app.listen(PORT, () => {
   console.log(`\n  🚀 WAG Services server attivo`);
   console.log(`  ➜ Local:   http://localhost:${PORT}`);
   console.log(`  ➜ API:     http://localhost:${PORT}/api\n`);
+  if (useMySQL) {
+    console.log(`  🗄️  DB:     MySQL (${process.env.DB_HOST || 'localhost'}) ${process.env.DB_NAME || ''}`);
+  } else {
+    console.log(`  🗄️  DB:     SQLite (${process.env.DB_PATH || path.join(__dirname, 'data', 'database.sqlite')})`);
+  }
 });
