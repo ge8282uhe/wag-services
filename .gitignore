@@ -1,6 +1,5 @@
 node_modules/
 data/database.sqlite
-.env
 *.log
 .DS_Store
 .next/
