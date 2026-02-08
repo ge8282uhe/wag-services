@@ -2080,7 +2080,9 @@
       }
 
       .hero-stats {
-        gap: 1rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        max-width: 360px;
         margin-top: 3rem;
       }
 
@@ -2116,8 +2118,8 @@
       }
 
       .hero-stats {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 320px;
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 360px;
       }
 
       .section {
@@ -2135,8 +2137,8 @@
 
     @media (max-width: 520px) {
       .hero-stats {
-        grid-template-columns: 1fr;
-        max-width: 240px;
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 360px;
       }
 
       .btn-primary,
