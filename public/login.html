@@ -889,11 +889,11 @@ body {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
 }
 
 .nav-link {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.6rem;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-secondary);
@@ -2794,33 +2794,10 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
                 Non hai un account? <a href="register.html">Registrati</a>
             </p>
 
-            <!-- Test buttons -->
-            <div class="mt-6 text-center" style="border-top:1px solid var(--border-subtle);padding-top:1.5rem">
-                <p class="label-sm mb-4" style="color:var(--text-tertiary)">Test rapido</p>
-                <div class="flex gap-2 justify-center" style="flex-wrap:wrap">
-                    <button type="button" onclick="fillAdmin()" class="btn-outline py-2 px-4" style="font-size:12px">
-                        🔑 Admin
-                    </button>
-                    <button type="button" onclick="fillUser()" class="btn-outline py-2 px-4" style="font-size:12px">
-                        👤 User
-                    </button>
-                    <a href="test_db.php" class="btn-outline py-2 px-4" style="font-size:12px" target="_blank">
-                        🔧 Test DB
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        function fillAdmin() {
-            document.getElementById('email').value = 'admin@wagservices.it';
-            document.getElementById('password').value = 'admin123';
-        }
-        function fillUser() {
-            document.getElementById('email').value = 'user@wagservices.it';
-            document.getElementById('password').value = 'user123';
-        }
         let showPassword = false;
 
         function togglePassword() {
