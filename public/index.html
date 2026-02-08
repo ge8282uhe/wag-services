@@ -2709,65 +2709,24 @@
       color: var(--text-primary);
     }
 
-    /* Aurora background */
-    .aurora-bg {
+    /* Particles background */
+    .particles-bg {
       position: fixed;
-      inset: -20%;
+      inset: 0;
       z-index: 0;
       pointer-events: none;
-      overflow: hidden;
     }
-
-    .aurora-layer {
-      position: absolute;
-      width: 140%;
-      height: 140%;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.45;
-      mix-blend-mode: screen;
-      animation: auroraMove 18s ease-in-out infinite;
-    }
-
-    .aurora-layer.layer-1 {
-      top: -30%;
-      left: -10%;
-      background: radial-gradient(circle at 30% 30%, rgba(168, 85, 247, 0.8), rgba(139, 92, 246, 0.25), transparent 60%);
-    }
-
-    .aurora-layer.layer-2 {
-      top: -10%;
-      right: -20%;
-      animation-delay: -6s;
-      background: radial-gradient(circle at 70% 20%, rgba(139, 92, 246, 0.7), rgba(109, 40, 217, 0.25), transparent 60%);
-    }
-
-    .aurora-layer.layer-3 {
-      bottom: -40%;
-      left: -20%;
-      animation-delay: -12s;
-      background: radial-gradient(circle at 40% 70%, rgba(109, 40, 217, 0.65), rgba(76, 29, 149, 0.25), transparent 60%);
-    }
-
-    @keyframes auroraMove {
-      0% {
-        transform: translate3d(0, 0, 0) rotate(0deg);
-      }
-
-      50% {
-        transform: translate3d(5%, -3%, 0) rotate(8deg);
-      }
-
-      100% {
-        transform: translate3d(0, 0, 0) rotate(0deg);
-      }
+    .particles-bg canvas {
+      width: 100% !important;
+      height: 100% !important;
+      pointer-events: auto;
     }
 
     body {
       position: relative;
     }
 
-    body>*:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.sidebar-toggle):not(.sidebar-overlay):not(.toast-container):not(.modal-backdrop) {
+    body>*:not(.particles-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.sidebar-toggle):not(.sidebar-overlay):not(.toast-container):not(.modal-backdrop) {
       position: relative;
       z-index: 1;
     }
@@ -2949,11 +2908,7 @@
 
 <body>
 
-  <div class="aurora-bg" aria-hidden="true">
-    <span class="aurora-layer layer-1"></span>
-    <span class="aurora-layer layer-2"></span>
-    <span class="aurora-layer layer-3"></span>
-  </div>
+  <div class="particles-bg" id="particles-bg" aria-hidden="true"></div>
   <!-- Navbar -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
@@ -3899,6 +3854,143 @@
       cursorGlow.style.opacity = '1';
     });
     document.addEventListener('mouseleave', () => { cursorGlow.style.opacity = '0'; });
+  </script>
+
+  <!-- ===== OGL PARTICLES BACKGROUND ===== -->
+  <script type="module">
+    import { Renderer, Camera, Geometry, Program, Mesh } from 'https://cdn.jsdelivr.net/npm/ogl@1.0.11/dist/ogl.mjs';
+
+    const container = document.getElementById('particles-bg');
+    if (container) {
+      const mouse = { x: 0, y: 0 };
+
+      const renderer = new Renderer({ dpr: 1, depth: false, alpha: true });
+      const gl = renderer.gl;
+      container.appendChild(gl.canvas);
+      gl.clearColor(0, 0, 0, 0);
+
+      const camera = new Camera(gl, { fov: 15 });
+      camera.position.set(0, 0, 20);
+
+      function resize() {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        renderer.setSize(w, h);
+        camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      });
+
+      const count = 200;
+      const positions = new Float32Array(count * 3);
+      const randoms = new Float32Array(count * 4);
+      const colors = new Float32Array(count * 3);
+      const palette = [[1, 1, 1]]; // white
+
+      for (let i = 0; i < count; i++) {
+        let x, y, z, len;
+        do {
+          x = Math.random() * 2 - 1;
+          y = Math.random() * 2 - 1;
+          z = Math.random() * 2 - 1;
+          len = x * x + y * y + z * z;
+        } while (len > 1 || len === 0);
+        const r = Math.cbrt(Math.random());
+        positions.set([x * r, y * r, z * r], i * 3);
+        randoms.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
+        const col = palette[Math.floor(Math.random() * palette.length)];
+        colors.set(col, i * 3);
+      }
+
+      const geometry = new Geometry(gl, {
+        position: { size: 3, data: positions },
+        random: { size: 4, data: randoms },
+        color: { size: 3, data: colors },
+      });
+
+      const vertex = `
+        attribute vec3 position;
+        attribute vec4 random;
+        attribute vec3 color;
+        uniform mat4 modelMatrix;
+        uniform mat4 viewMatrix;
+        uniform mat4 projectionMatrix;
+        uniform float uTime;
+        uniform float uSpread;
+        uniform float uBaseSize;
+        varying vec4 vRandom;
+        varying vec3 vColor;
+        void main() {
+          vRandom = random;
+          vColor = color;
+          vec3 pos = position * uSpread;
+          pos.z *= 10.0;
+          vec4 mPos = modelMatrix * vec4(pos, 1.0);
+          float t = uTime;
+          mPos.x += sin(t * random.z + 6.28 * random.w) * mix(0.1, 1.5, random.x);
+          mPos.y += sin(t * random.y + 6.28 * random.x) * mix(0.1, 1.5, random.w);
+          mPos.z += sin(t * random.w + 6.28 * random.y) * mix(0.1, 1.5, random.z);
+          vec4 mvPos = viewMatrix * mPos;
+          gl_PointSize = (uBaseSize * (1.0 + 1.0 * (random.x - 0.5))) / length(mvPos.xyz);
+          gl_Position = projectionMatrix * mvPos;
+        }
+      `;
+
+      const fragment = `
+        precision highp float;
+        uniform float uTime;
+        varying vec4 vRandom;
+        varying vec3 vColor;
+        void main() {
+          vec2 uv = gl_PointCoord.xy;
+          float d = length(uv - vec2(0.5));
+          if (d > 0.5) discard;
+          gl_FragColor = vec4(vColor + 0.2 * sin(uv.yxx + uTime + vRandom.y * 6.28), 1.0);
+        }
+      `;
+
+      const program = new Program(gl, {
+        vertex,
+        fragment,
+        uniforms: {
+          uTime: { value: 0 },
+          uSpread: { value: 10 },
+          uBaseSize: { value: 100 },
+        },
+        transparent: true,
+        depthTest: false,
+      });
+
+      const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
+
+      let lastTime = performance.now();
+      let elapsed = 0;
+
+      function update(t) {
+        requestAnimationFrame(update);
+        const delta = t - lastTime;
+        lastTime = t;
+        elapsed += delta * 0.1;
+
+        program.uniforms.uTime.value = elapsed * 0.001;
+
+        particles.position.x = -mouse.x * 1;
+        particles.position.y = -mouse.y * 1;
+
+        particles.rotation.x = Math.sin(elapsed * 0.0002) * 0.1;
+        particles.rotation.y = Math.cos(elapsed * 0.0005) * 0.15;
+        particles.rotation.z += 0.01 * 0.1;
+
+        renderer.render({ scene: particles, camera });
+      }
+      requestAnimationFrame(update);
+    }
   </script>
 </body>
 
