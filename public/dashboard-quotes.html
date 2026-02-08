@@ -1779,6 +1779,18 @@
       width: 36px;
       height: 36px;
       font-size: 12px;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 36px;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .sidebar-profile .testimonial-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .main-content {
@@ -3183,11 +3195,14 @@
       document.getElementById('userName').textContent = user.name || 'Utente';
       document.getElementById('userEmail').textContent = user.email || '';
       const avatarEl = document.getElementById('userAvatar');
-      const avatarUrl = user.avatar || user.avatarUrl || user.photo || user.photoUrl;
+      const avatarUrl = user.avatar || user.avatarUrl || user.photo || user.photoUrl || user.profileImage || user.profile_image || user.image || user.picture || user.avatar_url;
       if (avatarEl && avatarUrl) {
         avatarEl.textContent = '';
-        avatarEl.style.backgroundImage = 'url(' + avatarUrl + ')';
-        avatarEl.classList.add('has-image');
+        avatarEl.style.backgroundImage = '';
+        const img = document.createElement('img');
+        img.src = avatarUrl;
+        img.alt = 'Avatar';
+        avatarEl.appendChild(img);
       } else if (avatarEl) {
         avatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
       }
