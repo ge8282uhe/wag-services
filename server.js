@@ -48,6 +48,34 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Debug: verifica presenza env (non espone valori sensibili)
+app.get('/api/env-check', (req, res) => {
+  res.json({
+    ok: true,
+    useMySQL,
+    dbConfig: {
+      host: !!dbConfig.host,
+      user: !!dbConfig.user,
+      password: !!dbConfig.password,
+      database: !!dbConfig.database,
+    },
+    rawEnv: {
+      DB_HOST: !!process.env.DB_HOST,
+      DB_USER: !!process.env.DB_USER,
+      DB_PASSWORD: !!process.env.DB_PASSWORD,
+      DB_NAME: !!process.env.DB_NAME,
+      MYSQL_HOST: !!process.env.MYSQL_HOST,
+      MYSQL_USER: !!process.env.MYSQL_USER,
+      MYSQL_PASSWORD: !!process.env.MYSQL_PASSWORD,
+      MYSQL_DATABASE: !!process.env.MYSQL_DATABASE,
+      DATABASE_HOST: !!process.env.DATABASE_HOST,
+      DATABASE_USER: !!process.env.DATABASE_USER,
+      DATABASE_PASSWORD: !!process.env.DATABASE_PASSWORD,
+      DATABASE_NAME: !!process.env.DATABASE_NAME,
+    }
+  });
+});
+
 // ─── Error handler globale ─────────────────────────
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
