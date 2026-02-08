@@ -1,0 +1,49 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
+
+const { initDatabase } = require('./src/db/init');
+const authRoutes = require('./src/routes/auth');
+const quotesRoutes = require('./src/routes/quotes');
+const usersRoutes = require('./src/routes/users');
+const statsRoutes = require('./src/routes/stats');
+const portfolioRoutes = require('./src/routes/portfolio');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ─── Middleware ───────────────────────────────────────
+app.use(cors());
+app.use(express.json());
+
+// ─── Static files (public/) ──────────────────────────
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ─── API Routes ──────────────────────────────────────
+app.use('/api/login', authRoutes.login);
+app.use('/api/register', authRoutes.register);
+app.use('/api/quotes', quotesRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+
+// ─── SPA Fallback: serve index.html per route non-API ─
+app.get('/{*splat}', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ─── Error handler globale ───────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ error: 'Errore interno del server' });
+});
+
+// ─── Inizializza DB e avvia server ───────────────────
+initDatabase();
+
+app.listen(PORT, () => {
+  console.log(`\n  🚀 WAG Services server attivo`);
+  console.log(`  ➜ Local:   http://localhost:${PORT}`);
+  console.log(`  ➜ API:     http://localhost:${PORT}/api\n`);
+});
