@@ -2,6 +2,10 @@
 
 Hai creato un **nuovo sito** Node.js: serve un **database MySQL** per quel sito. Segui questi passi in ordine.
 
+> Nota importante: su Hostinger il filesystem della Node app non e persistente.
+> Se usi SQLite, i dati si azzerano a ogni restart/deploy.
+> Per evitare il reset, usa sempre MySQL con le variabili d'ambiente sotto.
+
 ---
 
 ## Passo 1 – Crea il database MySQL (hPanel)
