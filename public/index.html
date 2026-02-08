@@ -3856,8 +3856,7 @@
           vy: (Math.random() - 0.5) * 0.0003,
           phase: Math.random() * Math.PI * 2,
           speed: Math.random() * 0.3 + 0.1,
-          glow: Math.random(),
-          bright: Math.random() < 0.22
+          glow: Math.random()
         });
       }
 
@@ -3893,24 +3892,12 @@
 
           var screenX = p.x * W;
           var screenY = p.y * H;
-          var glowBoost = p.bright ? 1.6 : 1.0;
-          var coreRadius = p.z * (1.1 + p.glow * 1.1) * glowBoost;
-          var haloRadius = coreRadius * (3.2 + p.glow * 1.6) * glowBoost;
-          var coreAlpha = Math.min(1, 0.35 + p.z * 0.35 + p.glow * (p.bright ? 0.6 : 0.35));
-          var haloAlpha = (p.bright ? 0.22 : 0.12) + p.glow * 0.2;
-
-          var gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, haloRadius);
-          gradient.addColorStop(0, 'rgba(255,255,255,' + coreAlpha + ')');
-          gradient.addColorStop(0.25, 'rgba(255,255,255,' + (coreAlpha * 0.6) + ')');
-          gradient.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(screenX, screenY, haloRadius, 0, Math.PI * 2);
-          ctx.fill();
+          var radius = p.z * (1.2 + p.glow * 1.4);
+          var alpha = Math.min(1, 0.25 + p.z * 0.35 + p.glow * 0.35);
 
           ctx.beginPath();
-          ctx.arc(screenX, screenY, coreRadius, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,' + (coreAlpha + haloAlpha) + ')';
+          ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
           ctx.fill();
         }
       }
