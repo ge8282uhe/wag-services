@@ -77,7 +77,7 @@
     }
 
     .heading-display {
-      font-size: clamp(3.25rem, 7.5vw, 6.75rem);
+      font-size: clamp(4rem, 10vw, 8rem);
       font-weight: 700;
       line-height: 0.95;
       letter-spacing: -0.04em;
@@ -2698,6 +2698,7 @@
       z-index: 0;
       pointer-events: none;
     }
+
     .particles-bg canvas {
       width: 100% !important;
       height: 100% !important;
@@ -2882,8 +2883,6 @@
     .folder.open .paper-link:nth-child(3):hover {
       transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1);
     }
-
-
   </style>
 </head>
 
@@ -2944,8 +2943,9 @@
         Prodotti digitali veloci e su misura.
       </p>
       <div class="flex items-center justify-center gap-4 mt-10 animate-fade-in animate-delay-4" style="flex-wrap:wrap">
-        <a href="login.html" class="btn-primary px-8 py-3 hover-glow">Accedi e ricevi un preventivo gratuito <svg style="margin-left:8px"
-            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="login.html" class="btn-primary px-8 py-3 hover-glow">Accedi e ricevi un preventivo gratuito <svg
+            style="margin-left:8px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg></a>
         <a href="#lavori" class="btn-outline hover-border-glow">Guarda i progetti</a>
@@ -3054,18 +3054,20 @@
       <!-- Folder Component -->
       <div class="folder-anchor">
         <div class="folder-wrapper" id="folderToggle">
-          <div class="folder" id="folderEl"
-            style="--folder-color:#8b5cf6;--folder-back:#7237e0;transform:scale(1.5)">
+          <div class="folder" id="folderEl" style="--folder-color:#8b5cf6;--folder-back:#7237e0;transform:scale(1.5)">
             <div class="folder__back">
-                  <a class="paper-link" href="https://www.apple.com" target="_blank" rel="noopener noreferrer" aria-label="Visita progetto Apple">
-                    <img src="https://cdn.simpleicons.org/apple/111111" alt="Apple" loading="lazy">
-                  </a>
-                  <a class="paper-link" href="https://www.google.com" target="_blank" rel="noopener noreferrer" aria-label="Visita progetto Google">
-                    <img src="https://cdn.simpleicons.org/google/111111" alt="Google" loading="lazy">
-                  </a>
-                  <a class="paper-link" href="https://www.microsoft.com" target="_blank" rel="noopener noreferrer" aria-label="Visita progetto Microsoft">
-                    <img src="https://cdn.simpleicons.org/microsoft/111111" alt="Microsoft" loading="lazy">
-                  </a>
+              <a class="paper-link" href="https://www.apple.com" target="_blank" rel="noopener noreferrer"
+                aria-label="Visita progetto Apple">
+                <img src="https://cdn.simpleicons.org/apple/111111" alt="Apple" loading="lazy">
+              </a>
+              <a class="paper-link" href="https://www.google.com" target="_blank" rel="noopener noreferrer"
+                aria-label="Visita progetto Google">
+                <img src="https://cdn.simpleicons.org/google/111111" alt="Google" loading="lazy">
+              </a>
+              <a class="paper-link" href="https://www.microsoft.com" target="_blank" rel="noopener noreferrer"
+                aria-label="Visita progetto Microsoft">
+                <img src="https://cdn.simpleicons.org/microsoft/111111" alt="Microsoft" loading="lazy">
+              </a>
               <div class="folder__front"></div>
               <div class="folder__front--right"></div>
             </div>
@@ -3573,9 +3575,9 @@
             codice.</span></h2>
         <p class="max-w-md mx-auto mt-4" style="font-size:15px;font-weight:300;color:var(--text-secondary)">20 minuti di
           call per capire obiettivi, budget e timing. Se c'è match, prepariamo una proposta chiara.</p>
-        <div class="mt-8"><a href="login.html" class="btn-primary px-8 py-4" style="font-size:14px">Accedi e ricevi un preventivo gratuito <svg
-              style="margin-left:8px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
+        <div class="mt-8"><a href="login.html" class="btn-primary px-8 py-4" style="font-size:14px">Accedi e ricevi un
+            preventivo gratuito <svg style="margin-left:8px" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg></a></div>
       </div>
@@ -3819,7 +3821,7 @@
 
   <!-- ===== PARTICLES BACKGROUND (pure Canvas 2D) ===== -->
   <script>
-    (function() {
+    (function () {
       var container = document.getElementById('particles-bg');
       if (!container) return;
       var canvas = document.createElement('canvas');
@@ -3842,7 +3844,7 @@
       window.addEventListener('resize', resize);
       resize();
 
-      window.addEventListener('mousemove', function(e) {
+      window.addEventListener('mousemove', function (e) {
         mouse.x = e.clientX / W;
         mouse.y = e.clientY / H;
       });
