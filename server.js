@@ -1,3 +1,4 @@
+// Deploy test: 2026-02-08 - MySQL only, no SQLite
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
