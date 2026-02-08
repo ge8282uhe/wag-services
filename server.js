@@ -39,8 +39,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Errore interno del server' });
 });
 
-// ─── Inizializza DB e avvia server ───────────────────
-initDatabase();
+// ─── Inizializza DB (solo SQLite; con MySQL usi database importato in phpMyAdmin) ─
+const useMySQL = !!(process.env.DB_HOST || process.env.DB_NAME);
+if (!useMySQL) {
+  initDatabase();
+}
 
 app.listen(PORT, () => {
   console.log(`\n  🚀 WAG Services server attivo`);

@@ -1,0 +1,14 @@
+---
+description: Dopo modifiche al progetto, aggiornare la repository GitHub (git add, commit, push)
+alwaysApply: true
+---
+
+# Aggiornare la repository dopo le modifiche
+
+Dopo ogni modifica al codice o ai file del progetto:
+
+1. **Aggiungi** i file modificati: `git add .` (o i file specifici)
+2. **Commit** con messaggio chiaro: `git commit -m "Descrizione delle modifiche"`
+3. **Push** su GitHub: `git push`
+
+In questo modo Hostinger (con webhook attivo) riceve gli aggiornamenti e può rifare il deploy. Esegui questi passi alla fine della sessione di modifiche, prima di considerare il task completato.

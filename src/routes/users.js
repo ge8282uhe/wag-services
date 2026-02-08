@@ -1,17 +1,15 @@
 const express = require('express');
-const { getDb } = require('../config/database');
+const { getDb, getSqlNow } = require('../config/database');
 
 const router = express.Router();
 
-// ─── GET - Lista utenti ──────────────────────────────
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const db = getDb();
-    const users = db.prepare(
+    const users = await db.all(
       'SELECT id, name, email, role, banned, created_at FROM users ORDER BY created_at DESC'
-    ).all();
+    );
 
-    // Converti banned da 0/1 a boolean
     users.forEach(u => { u.banned = !!u.banned; });
 
     res.json({ users });
@@ -21,8 +19,7 @@ router.get('/', (req, res) => {
   }
 });
 
-// ─── PUT - Aggiorna utente (ban/unban, ruolo) ────────
-router.put('/', (req, res) => {
+router.put('/', async (req, res) => {
   try {
     const { id, banned, role } = req.body;
 
@@ -47,10 +44,11 @@ router.put('/', (req, res) => {
       return res.status(400).json({ error: 'Nessun campo da aggiornare' });
     }
 
-    updates.push("updated_at = datetime('now')");
+    const now = getSqlNow();
+    updates.push(`updated_at = ${now}`);
     params.push(id);
 
-    db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+    await db.run(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
 
     res.json({ message: 'Utente aggiornato' });
   } catch (err) {
@@ -59,10 +57,8 @@ router.put('/', (req, res) => {
   }
 });
 
-// ─── DELETE - Elimina utente ─────────────────────────
-router.delete('/', (req, res) => {
+router.delete('/', async (req, res) => {
   try {
-    // Supporta sia query param che body
     const id = req.query.id || (req.body && req.body.id);
 
     if (!id) {
@@ -70,7 +66,7 @@ router.delete('/', (req, res) => {
     }
 
     const db = getDb();
-    db.prepare('DELETE FROM users WHERE id = ?').run(id);
+    await db.run('DELETE FROM users WHERE id = ?', [id]);
 
     res.json({ message: 'Utente eliminato' });
   } catch (err) {

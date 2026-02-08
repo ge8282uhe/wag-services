@@ -1,11 +1,10 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../config/database');
+const { getDb, getSqlNow } = require('../config/database');
 
 const router = express.Router();
 
-// ─── GET - Lista preventivi ──────────────────────────
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const db = getDb();
     const userId = req.query.user_id;
@@ -16,18 +15,16 @@ router.get('/', (req, res) => {
       FROM quotes q
       LEFT JOIN users u ON q.user_id = u.id
     `;
-
     const params = [];
 
     if (userId) {
       sql += ' WHERE q.user_id = ?';
       params.push(userId);
     }
-
     sql += ' ORDER BY q.created_at DESC LIMIT ?';
     params.push(limit);
 
-    const quotes = db.prepare(sql).all(...params);
+    const quotes = await db.all(sql, params);
     res.json({ quotes });
   } catch (err) {
     console.error('GET quotes error:', err);
@@ -35,8 +32,7 @@ router.get('/', (req, res) => {
   }
 });
 
-// ─── POST - Crea nuovo preventivo ────────────────────
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { user_id, project_type, budget_range, description, deadline, attachments } = req.body;
 
@@ -47,10 +43,11 @@ router.post('/', (req, res) => {
     const db = getDb();
     const id = 'quote_' + uuidv4().replace(/-/g, '').substring(0, 16);
 
-    db.prepare(`
-      INSERT INTO quotes (id, user_id, project_type, budget_range, description, deadline, attachments, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')
-    `).run(id, user_id, project_type, budget_range || '', description, deadline || '', attachments || '');
+    await db.run(
+      `INSERT INTO quotes (id, user_id, project_type, budget_range, description, deadline, attachments, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING')`,
+      [id, user_id, project_type, budget_range || '', description, deadline || '', attachments || '']
+    );
 
     res.json({ message: 'Preventivo creato', id });
   } catch (err) {
@@ -59,8 +56,7 @@ router.post('/', (req, res) => {
   }
 });
 
-// ─── PUT - Aggiorna stato preventivo (admin) ─────────
-router.put('/', (req, res) => {
+router.put('/', async (req, res) => {
   try {
     const { id, status, admin_notes } = req.body;
 
@@ -69,10 +65,11 @@ router.put('/', (req, res) => {
     }
 
     const db = getDb();
-    db.prepare(`
-      UPDATE quotes SET status = ?, admin_notes = ?, updated_at = datetime('now')
-      WHERE id = ?
-    `).run(status, admin_notes || '', id);
+    const now = getSqlNow();
+    await db.run(
+      `UPDATE quotes SET status = ?, admin_notes = ?, updated_at = ${now} WHERE id = ?`,
+      [status, admin_notes || '', id]
+    );
 
     res.json({ message: 'Preventivo aggiornato' });
   } catch (err) {
@@ -81,10 +78,8 @@ router.put('/', (req, res) => {
   }
 });
 
-// ─── DELETE - Elimina preventivo ─────────────────────
-router.delete('/', (req, res) => {
+router.delete('/', async (req, res) => {
   try {
-    // Supporta sia query param che body
     const id = req.query.id || (req.body && req.body.id);
 
     if (!id) {
@@ -92,7 +87,7 @@ router.delete('/', (req, res) => {
     }
 
     const db = getDb();
-    db.prepare('DELETE FROM quotes WHERE id = ?').run(id);
+    await db.run('DELETE FROM quotes WHERE id = ?', [id]);
 
     res.json({ message: 'Preventivo eliminato' });
   } catch (err) {

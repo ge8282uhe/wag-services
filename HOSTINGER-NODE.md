@@ -19,9 +19,17 @@ Il deploy dalla sezione **Git** copia solo i file e non avvia Node.js. Per avere
    - **Application root:** lascia vuoto (la root del repo contiene già `server.js` e `package.json`).
    - Se richiesto, **Node.js version:** 20.x o 22.x.
 
-4. **Variabili d’ambiente** (se c’è la sezione Environment)
+4. **Variabili d’ambiente** (obbligatorie per login e database)
+   In hPanel, nella sezione Environment / Variabili del deploy Node.js, aggiungi:
    - `NODE_ENV` = `production`
-   - `PORT` = di solito viene impostato da Hostinger (es. 3000).
+   - `PORT` = (di solito lo imposta Hostinger; se no, `3000`)
+   - **Per usare il database MySQL** (così il login funziona):
+     - `DB_HOST` = `localhost`
+     - `DB_NAME` = `u825008747_WAGservices` (il nome del database che vedi in Databases)
+     - `DB_USER` = `u825008747_Tronco` (l’utente MySQL)
+     - `DB_PASSWORD` = (la password del database MySQL, quella di phpMyAdmin)
+
+   Se queste quattro variabili MySQL sono impostate, l’app si connette al database che hai importato in phpMyAdmin. Senza di esse, l’app userebbe SQLite (che su Hostinger spesso non è adatto).
 
 5. **Avvia il deploy**
    - Conferma e attendi la build. Hostinger eseguirà `npm install` e avvierà `node server.js`.

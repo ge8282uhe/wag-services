@@ -1,11 +1,10 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { getDb } = require('../config/database');
+const { getDb, getSqlNow } = require('../config/database');
 
 const router = express.Router();
 
-// ─── GET - Lista portfolio items ─────────────────────
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const db = getDb();
     let sql = 'SELECT * FROM portfolio_items';
@@ -13,12 +12,10 @@ router.get('/', (req, res) => {
     if (req.query.featured !== undefined) {
       sql += ' WHERE featured = 1';
     }
-
     sql += ' ORDER BY created_at DESC';
 
-    const items = db.prepare(sql).all();
+    const items = await db.all(sql);
 
-    // Converti featured da 0/1 a boolean
     items.forEach(item => { item.featured = !!item.featured; });
 
     res.json(items);
@@ -28,8 +25,7 @@ router.get('/', (req, res) => {
   }
 });
 
-// ─── POST - Crea portfolio item ──────────────────────
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { title, description, image_url, project_url, category, featured } = req.body;
 
@@ -40,10 +36,11 @@ router.post('/', (req, res) => {
     const db = getDb();
     const id = 'port_' + uuidv4().replace(/-/g, '').substring(0, 16);
 
-    db.prepare(`
-      INSERT INTO portfolio_items (id, title, description, image_url, project_url, category, featured)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(id, title, description, image_url, project_url || '', category, featured ? 1 : 0);
+    await db.run(
+      `INSERT INTO portfolio_items (id, title, description, image_url, project_url, category, featured)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id, title, description, image_url, project_url || '', category, featured ? 1 : 0]
+    );
 
     res.json({ message: 'Portfolio item creato', id });
   } catch (err) {
@@ -52,8 +49,7 @@ router.post('/', (req, res) => {
   }
 });
 
-// ─── PUT - Aggiorna portfolio item ───────────────────
-router.put('/', (req, res) => {
+router.put('/', async (req, res) => {
   try {
     const { id, title, description, image_url, project_url, category, featured } = req.body;
 
@@ -76,10 +72,11 @@ router.put('/', (req, res) => {
       return res.status(400).json({ error: 'Nessun campo da aggiornare' });
     }
 
-    updates.push("updated_at = datetime('now')");
+    const now = getSqlNow();
+    updates.push(`updated_at = ${now}`);
     params.push(id);
 
-    db.prepare(`UPDATE portfolio_items SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+    await db.run(`UPDATE portfolio_items SET ${updates.join(', ')} WHERE id = ?`, params);
 
     res.json({ message: 'Portfolio item aggiornato' });
   } catch (err) {
@@ -88,10 +85,8 @@ router.put('/', (req, res) => {
   }
 });
 
-// ─── DELETE - Elimina portfolio item ─────────────────
-router.delete('/', (req, res) => {
+router.delete('/', async (req, res) => {
   try {
-    // Supporta sia query param che body
     const id = req.query.id || (req.body && req.body.id);
 
     if (!id) {
@@ -99,7 +94,7 @@ router.delete('/', (req, res) => {
     }
 
     const db = getDb();
-    db.prepare('DELETE FROM portfolio_items WHERE id = ?').run(id);
+    await db.run('DELETE FROM portfolio_items WHERE id = ?', [id]);
 
     res.json({ message: 'Portfolio item eliminato' });
   } catch (err) {

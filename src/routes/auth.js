@@ -3,10 +3,9 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../config/database');
 
-// ─── LOGIN ───────────────────────────────────────────
 const login = express.Router();
 
-login.post('/', (req, res) => {
+login.post('/', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -15,7 +14,7 @@ login.post('/', (req, res) => {
     }
 
     const db = getDb();
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
 
     if (!user) {
       return res.status(401).json({ error: 'Email o password non validi' });
@@ -40,10 +39,9 @@ login.post('/', (req, res) => {
   }
 });
 
-// ─── REGISTER ────────────────────────────────────────
 const register = express.Router();
 
-register.post('/', (req, res) => {
+register.post('/', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -53,23 +51,18 @@ register.post('/', (req, res) => {
 
     const db = getDb();
 
-    // Controlla se l'email esiste già
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    const existing = await db.get('SELECT id FROM users WHERE email = ?', [email]);
     if (existing) {
       return res.status(400).json({ error: 'Email già registrata' });
     }
 
-    // Hash password
     const passwordHash = bcrypt.hashSync(password, 10);
-
-    // Genera ID unico
     const id = 'user_' + uuidv4().replace(/-/g, '').substring(0, 16);
 
-    // Inserisci utente
-    db.prepare(`
-      INSERT INTO users (id, name, email, password_hash, role)
-      VALUES (?, ?, ?, ?, 'USER')
-    `).run(id, name, email, passwordHash);
+    await db.run(
+      `INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, 'USER')`,
+      [id, name, email, passwordHash]
+    );
 
     res.json({ message: 'Account creato con successo' });
   } catch (err) {

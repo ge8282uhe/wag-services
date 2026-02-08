@@ -1,17 +1,68 @@
-const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'database.sqlite');
+const useMySQL = !!(process.env.DB_HOST || process.env.DB_NAME);
 
-let db;
+let sqliteDb;
+let mysqlPool;
 
-function getDb() {
-  if (!db) {
-    db = new Database(DB_PATH);
-    db.pragma('journal_mode = WAL');
-    db.pragma('foreign_keys = ON');
-  }
-  return db;
+if (useMySQL) {
+  const mysql = require('mysql2/promise');
+  mysqlPool = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    charset: 'utf8mb4',
+  });
 }
 
-module.exports = { getDb };
+function getSqliteDb() {
+  if (!sqliteDb) {
+    const Database = require('better-sqlite3');
+    const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'database.sqlite');
+    sqliteDb = new Database(DB_PATH);
+    sqliteDb.pragma('journal_mode = WAL');
+    sqliteDb.pragma('foreign_keys = ON');
+  }
+  return sqliteDb;
+}
+
+/** Restituisce l’espressione SQL per “adesso” (SQLite vs MySQL) */
+function getSqlNow() {
+  return useMySQL ? 'NOW()' : "datetime('now')";
+}
+
+/**
+ * Adapter unico: get, all, run restituiscono sempre Promise.
+ * Le route usano await; in locale (SQLite) funziona uguale.
+ */
+function getDb() {
+  if (useMySQL) {
+    return {
+      get: async (sql, params = []) => {
+        const [rows] = await mysqlPool.execute(sql, Array.isArray(params) ? params : [params]);
+        return rows[0] || null;
+      },
+      all: async (sql, params = []) => {
+        const [rows] = await mysqlPool.execute(sql, Array.isArray(params) ? params : [params]);
+        return rows;
+      },
+      run: async (sql, params = []) => {
+        const [result] = await mysqlPool.execute(sql, Array.isArray(params) ? params : [params]);
+        return { insertId: result.insertId, changes: result.affectedRows };
+      },
+    };
+  }
+
+  const db = getSqliteDb();
+  return {
+    get: (sql, params = []) => Promise.resolve(db.prepare(sql).get(...(Array.isArray(params) ? params : [params]))),
+    all: (sql, params = []) => Promise.resolve(db.prepare(sql).all(...(Array.isArray(params) ? params : [params]))),
+    run: (sql, params = []) => Promise.resolve(db.prepare(sql).run(...(Array.isArray(params) ? params : [params]))),
+  };
+}
+
+module.exports = { getDb, getSqlNow };
