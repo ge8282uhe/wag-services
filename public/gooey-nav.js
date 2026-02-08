@@ -155,6 +155,9 @@
     var activeItem = items.find(function (item) { return item.classList.contains('active'); }) || items[0];
     updateEffectPosition(activeItem);
     textEl.classList.add('active');
+    filterEl.classList.remove('active');
+    void filterEl.offsetWidth;
+    filterEl.classList.add('active');
 
     items.forEach(function (item) {
       var link = item.querySelector('a');
@@ -180,9 +183,32 @@
       }
     });
     resizeObserver.observe(container);
+
+    container._gooeyRefresh = function () {
+      if (activeItem) updateEffectPosition(activeItem);
+    };
   }
 
-  /* --- Boot --- */
+  window.refreshGooeyNav = function () {
+    document.querySelectorAll('.gooey-nav-container').forEach(function (c) {
+      if (c._gooeyRefresh) c._gooeyRefresh();
+    });
+  };
+
+  /* --- Boot: dopo il layout così la sidebar ha dimensioni corrette --- */
   ensureSVGFilter();
-  document.querySelectorAll('.gooey-nav-container').forEach(initGooeyNav);
+  function boot() {
+    document.querySelectorAll('.gooey-nav-container').forEach(initGooeyNav);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(boot);
+      });
+    });
+  } else {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(boot);
+    });
+  }
 })();

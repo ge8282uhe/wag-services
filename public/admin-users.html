@@ -2906,6 +2906,7 @@ body > *:not(.aurora-bg):not(.navbar):not(.mobile-menu):not(.scroll-top):not(.si
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('active');
+            if (sidebar.classList.contains('open')) setTimeout(function () { window.refreshGooeyNav && window.refreshGooeyNav(); }, 150);
         });
         sidebarOverlay.addEventListener('click', () => {
             sidebar.classList.remove('open');
