@@ -2779,7 +2779,7 @@
       transform: skew(-15deg) scaleY(0.6);
     }
 
-    .folder:hover .paper {
+    .folder:hover .paper-link {
       transform: translate(-50%, 0%);
     }
 
@@ -2803,7 +2803,8 @@
       border-radius: 5px 5px 0 0;
     }
 
-    .paper {
+
+    .paper-link {
       position: absolute;
       z-index: 2;
       bottom: 10%;
@@ -2814,18 +2815,32 @@
       background: #e6e6e6;
       border-radius: 10px;
       transition: all 0.3s ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111111;
+      text-decoration: none;
+      pointer-events: none;
     }
 
-    .paper:nth-child(2) {
+
+    .paper-link:nth-child(2) {
       background: #f2f2f2;
       width: 80%;
       height: 70%;
     }
 
-    .paper:nth-child(3) {
+    .paper-link:nth-child(3) {
       background: #ffffff;
       width: 90%;
       height: 60%;
+    }
+
+    .paper-link img {
+      width: 28px;
+      height: 28px;
+      opacity: 0.85;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
     }
 
     .folder__front {
@@ -2863,29 +2878,33 @@
       transform: skew(-15deg) scaleY(0.6);
     }
 
-    .folder.open .paper:nth-child(1) {
+
+    .folder.open .paper-link:nth-child(1) {
       transform: translate(-120%, -70%) rotateZ(-15deg);
+      pointer-events: auto;
     }
 
-    .folder.open .paper:nth-child(1):hover {
+    .folder.open .paper-link:nth-child(2) {
+      transform: translate(10%, -70%) rotateZ(15deg);
+      height: 80%;
+      pointer-events: auto;
+    }
+
+    .folder.open .paper-link:nth-child(3) {
+      transform: translate(-50%, -100%) rotateZ(5deg);
+      height: 80%;
+      pointer-events: auto;
+    }
+
+    .folder.open .paper-link:nth-child(1):hover {
       transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.1);
     }
 
-    .folder.open .paper:nth-child(2) {
-      transform: translate(10%, -70%) rotateZ(15deg);
-      height: 80%;
-    }
-
-    .folder.open .paper:nth-child(2):hover {
+    .folder.open .paper-link:nth-child(2):hover {
       transform: translate(10%, -70%) rotateZ(15deg) scale(1.1);
     }
 
-    .folder.open .paper:nth-child(3) {
-      transform: translate(-50%, -100%) rotateZ(5deg);
-      height: 80%;
-    }
-
-    .folder.open .paper:nth-child(3):hover {
+    .folder.open .paper-link:nth-child(3):hover {
       transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1);
     }
 
@@ -3087,9 +3106,15 @@
           <div class="folder" id="folderEl"
             style="--folder-color:#8b5cf6;--folder-back:#7237e0;transform:scale(1.5)">
             <div class="folder__back">
-              <div class="paper"></div>
-              <div class="paper"></div>
-              <div class="paper"></div>
+                  <a class="paper-link" href="https://www.apple.com" target="_blank" rel="noopener noreferrer" aria-label="Visita progetto Apple">
+                    <img src="https://cdn.simpleicons.org/apple/111111" alt="Apple" loading="lazy">
+                  </a>
+                  <a class="paper-link" href="https://www.google.com" target="_blank" rel="noopener noreferrer" aria-label="Visita progetto Google">
+                    <img src="https://cdn.simpleicons.org/google/111111" alt="Google" loading="lazy">
+                  </a>
+                  <a class="paper-link" href="https://www.microsoft.com" target="_blank" rel="noopener noreferrer" aria-label="Visita progetto Microsoft">
+                    <img src="https://cdn.simpleicons.org/microsoft/111111" alt="Microsoft" loading="lazy">
+                  </a>
               <div class="folder__front"></div>
               <div class="folder__front--right"></div>
             </div>
@@ -3869,10 +3894,11 @@
       const folderEl = document.getElementById('folderEl');
       const grid = document.querySelector('.portfolio-grid');
       const hint = folderToggle.querySelector('.folder-hint');
-      const papers = folderEl.querySelectorAll('.paper');
+      const papers = folderEl.querySelectorAll('.paper-link');
       let isOpen = false;
 
-      folderToggle.addEventListener('click', () => {
+      folderToggle.addEventListener('click', (event) => {
+        if (event.target.closest('.paper-link')) return;
         isOpen = !isOpen;
         folderEl.classList.toggle('open', isOpen);
         grid.classList.toggle('is-collapsed', !isOpen);
