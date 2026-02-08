@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // ─── Static files (public/) ──────────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // ─── API Routes ──────────────────────────────────────
 app.use('/api/login', authRoutes.login);
