@@ -1,6 +1,13 @@
 const path = require('path');
 
-const useMySQL = !!(process.env.DB_HOST || process.env.DB_NAME);
+const dbConfig = {
+  host: process.env.DB_HOST || process.env.MYSQL_HOST || process.env.DATABASE_HOST,
+  user: process.env.DB_USER || process.env.MYSQL_USER || process.env.DATABASE_USER,
+  password: process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || process.env.DATABASE_PASSWORD,
+  database: process.env.DB_NAME || process.env.MYSQL_DATABASE || process.env.DATABASE_NAME,
+};
+
+const useMySQL = !!(dbConfig.host || dbConfig.database || dbConfig.user);
 
 let sqliteDb;
 let mysqlPool;
@@ -8,14 +15,14 @@ let mysqlPool;
 if (useMySQL) {
   const mysql = require('mysql2/promise');
   // 'localhost' su Hostinger risolve a IPv6 ::1 → forza 127.0.0.1
-  let dbHost = process.env.DB_HOST || '127.0.0.1';
+  let dbHost = dbConfig.host || '127.0.0.1';
   if (dbHost === 'localhost') dbHost = '127.0.0.1';
 
   mysqlPool = mysql.createPool({
     host: dbHost,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    user: dbConfig.user,
+    password: dbConfig.password,
+    database: dbConfig.database,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -84,4 +91,4 @@ async function testMySQLConnection() {
   }
 }
 
-module.exports = { getDb, getSqlNow, useMySQL, mysqlPool, testMySQLConnection };
+module.exports = { getDb, getSqlNow, useMySQL, mysqlPool, testMySQLConnection, dbConfig };

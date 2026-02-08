@@ -4,7 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const { initDatabase, initMySQLDatabase } = require('./src/db/init');
-const { useMySQL, testMySQLConnection } = require('./src/config/database');
+const { useMySQL, testMySQLConnection, dbConfig } = require('./src/config/database');
 const authRoutes = require('./src/routes/auth');
 const quotesRoutes = require('./src/routes/quotes');
 const usersRoutes = require('./src/routes/users');
@@ -39,7 +39,7 @@ app.get('/api/health', async (req, res) => {
       ok: true,
       db: 'connected',
       dbTarget: useMySQL
-        ? { type: 'mysql', host: process.env.DB_HOST, database: process.env.DB_NAME }
+        ? { type: 'mysql', host: dbConfig.host || '127.0.0.1', database: dbConfig.database || null }
         : { type: 'sqlite', path: path.join(__dirname, 'data', 'database.sqlite') },
     });
   } catch (err) {
@@ -58,13 +58,13 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     if (useMySQL) {
-      console.log(`\n  🗄️  Connessione a MySQL (${process.env.DB_HOST})...`);
+      console.log(`\n  🗄️  Connessione a MySQL (${dbConfig.host || '127.0.0.1'})...`);
       const test = await testMySQLConnection();
       if (!test.ok) {
         console.error(`  ❌ MySQL connection FAILED: ${test.error}`);
-        console.error(`     Host:     ${process.env.DB_HOST}`);
-        console.error(`     User:     ${process.env.DB_USER}`);
-        console.error(`     Database: ${process.env.DB_NAME}`);
+        console.error(`     Host:     ${dbConfig.host || '127.0.0.1'}`);
+        console.error(`     User:     ${dbConfig.user || 'N/A'}`);
+        console.error(`     Database: ${dbConfig.database || 'N/A'}`);
         console.error(`     Code:     ${test.code || 'N/A'}`);
         process.exit(1);
       }
@@ -79,7 +79,7 @@ async function start() {
       console.log(`  ➜ Local:   http://localhost:${PORT}`);
       console.log(`  ➜ API:     http://localhost:${PORT}/api`);
       if (useMySQL) {
-        console.log(`  🗄️  DB:     MySQL (${process.env.DB_HOST}) → ${process.env.DB_NAME}\n`);
+        console.log(`  🗄️  DB:     MySQL (${dbConfig.host || '127.0.0.1'}) → ${dbConfig.database || ''}\n`);
       } else {
         console.log(`  🗄️  DB:     SQLite (locale)\n`);
       }
