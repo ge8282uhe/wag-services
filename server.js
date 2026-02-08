@@ -4,7 +4,9 @@ const path = require('path');
 require('dotenv').config();
 
 const { initDatabase, initMySQLDatabase } = require('./src/db/init');
-const { useMySQL, testMySQLConnection, dbConfig } = require('./src/config/database');
+const { testMySQLConnection, dbConfig, switchToSqlite } = require('./src/config/database');
+// useMySQL è un getter dinamico, lo leggiamo dal modulo ogni volta
+const dbModule = require('./src/config/database');
 const authRoutes = require('./src/routes/auth');
 const quotesRoutes = require('./src/routes/quotes');
 const usersRoutes = require('./src/routes/users');
@@ -38,7 +40,7 @@ app.get('/api/health', async (req, res) => {
     res.json({
       ok: true,
       db: 'connected',
-      dbTarget: useMySQL
+      dbTarget: dbModule.useMySQL
         ? { type: 'mysql', host: dbConfig.host || '127.0.0.1', database: dbConfig.database || null }
         : { type: 'sqlite', path: path.join(__dirname, 'data', 'database.sqlite') },
     });
@@ -52,7 +54,7 @@ app.get('/api/health', async (req, res) => {
 app.get('/api/env-check', (req, res) => {
   res.json({
     ok: true,
-    useMySQL,
+    useMySQL: dbModule.useMySQL,
     dbConfig: {
       host: !!dbConfig.host,
       user: !!dbConfig.user,
@@ -85,20 +87,23 @@ app.use((err, req, res, next) => {
 // ─── Avvio server ────────────────────────────────────
 async function start() {
   try {
-    if (useMySQL) {
-      console.log(`\n  🗄️  Connessione a MySQL (${dbConfig.host || '127.0.0.1'})...`);
-      const test = await testMySQLConnection();
-      if (!test.ok) {
-        console.error(`  ❌ MySQL connection FAILED: ${test.error}`);
-        console.error(`     Host:     ${dbConfig.host || '127.0.0.1'}`);
-        console.error(`     User:     ${dbConfig.user || 'N/A'}`);
-        console.error(`     Database: ${dbConfig.database || 'N/A'}`);
-        console.error(`     Code:     ${test.code || 'N/A'}`);
-        process.exit(1);
+    // Prova MySQL
+    console.log(`\n  🗄️  Tentativo connessione MySQL (${dbConfig.host})...`);
+    const test = await testMySQLConnection();
+    if (test.ok) {
+      console.log(`  ✓  MySQL connesso${test.host ? ` (host: ${test.host})` : ''}`);
+      try {
+        await initMySQLDatabase();
+      } catch (initErr) {
+        console.error(`  ⚠️  MySQL init tabelle fallito: ${initErr.message}`);
+        console.log('  ⚠️  Ricaduta su SQLite...');
+        switchToSqlite();
+        initDatabase();
       }
-      console.log('  ✓  MySQL connesso');
-      await initMySQLDatabase();
     } else {
+      console.error(`  ❌ MySQL non disponibile: ${test.error} (code: ${test.code || 'N/A'})`);
+      console.log('  ⚠️  Ricaduta su SQLite...');
+      switchToSqlite();
       initDatabase();
     }
 
@@ -106,15 +111,20 @@ async function start() {
       console.log(`\n  🚀 WAG Services server attivo`);
       console.log(`  ➜ Local:   http://localhost:${PORT}`);
       console.log(`  ➜ API:     http://localhost:${PORT}/api`);
-      if (useMySQL) {
-        console.log(`  🗄️  DB:     MySQL (${dbConfig.host || '127.0.0.1'}) → ${dbConfig.database || ''}\n`);
+      if (dbModule.useMySQL) {
+        console.log(`  🗄️  DB:     MySQL (${dbConfig.host}) → ${dbConfig.database}\n`);
       } else {
-        console.log(`  🗄️  DB:     SQLite (locale)\n`);
+        console.log(`  🗄️  DB:     SQLite (locale) ⚠️ dati non persistenti su Hostinger\n`);
       }
     });
   } catch (err) {
     console.error('\n  ❌ Errore avvio server:', err.message);
-    process.exit(1);
+    // Non crashare, prova comunque
+    switchToSqlite();
+    initDatabase();
+    app.listen(PORT, () => {
+      console.log(`\n  🚀 WAG Services (emergency SQLite) su porta ${PORT}\n`);
+    });
   }
 }
 

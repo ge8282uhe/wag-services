@@ -15,15 +15,15 @@ const dbConfig = {
   database: process.env.DB_NAME || MYSQL_DEFAULTS.database,
 };
 
-// Forza SEMPRE MySQL (ignora SQLite in produzione)
-const useMySQL = true;
+// Inizia con MySQL abilitato, ma può ricadere su SQLite se fallisce
+let useMySQL = true;
+let mysqlReady = false;
 
 let sqliteDb;
 let mysqlPool;
 
 if (useMySQL) {
   const mysql = require('mysql2/promise');
-  // 'localhost' su Hostinger risolve a IPv6 ::1 → forza 127.0.0.1
   let dbHost = dbConfig.host || '127.0.0.1';
   if (dbHost === 'localhost') dbHost = '127.0.0.1';
 
@@ -36,7 +36,15 @@ if (useMySQL) {
     connectionLimit: 10,
     queueLimit: 0,
     charset: 'utf8mb4',
+    connectTimeout: 5000,
   });
+}
+
+/** Ricade su SQLite se MySQL non funziona */
+function switchToSqlite() {
+  console.log('  ⚠️  Ricaduta su SQLite (MySQL non disponibile)');
+  useMySQL = false;
+  mysqlReady = false;
 }
 
 function getSqliteDb() {
@@ -86,18 +94,63 @@ function getDb() {
 }
 
 /**
- * Testa la connessione MySQL. Restituisce { ok, error? }.
+ * Testa la connessione MySQL. Prova 127.0.0.1 e poi localhost.
  */
 async function testMySQLConnection() {
-  if (!useMySQL || !mysqlPool) return { ok: false, error: 'MySQL non configurato' };
+  if (!mysqlPool) return { ok: false, error: 'MySQL non configurato' };
+  
+  async function tryPool(pool, label) {
+    return Promise.race([
+      (async () => {
+        const conn = await pool.getConnection();
+        await conn.ping();
+        conn.release();
+        return { ok: true };
+      })(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout 5s')), 5000)),
+    ]);
+  }
+  
+  // Primo tentativo con host configurato
   try {
-    const conn = await mysqlPool.getConnection();
-    await conn.ping();
-    conn.release();
+    await tryPool(mysqlPool, dbConfig.host);
+    mysqlReady = true;
     return { ok: true };
   } catch (err) {
-    return { ok: false, error: err.message, code: err.code };
+    console.log(`  ⚠️  MySQL (${dbConfig.host}) fallito: ${err.code || err.message}`);
+  }
+
+  // Secondo tentativo: prova host alternativo
+  try {
+    const mysql = require('mysql2/promise');
+    const altHost = dbConfig.host === '127.0.0.1' ? 'localhost' : '127.0.0.1';
+    console.log(`  🔄 Riprovo con host: ${altHost}...`);
+    
+    const altPool = mysql.createPool({
+      host: altHost,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      database: dbConfig.database,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      charset: 'utf8mb4',
+      connectTimeout: 5000,
+    });
+    
+    await tryPool(altPool, altHost);
+    
+    // Funziona con host alternativo: aggiorna il pool
+    mysqlPool = altPool;
+    dbConfig.host = altHost;
+    mysqlReady = true;
+    return { ok: true, host: altHost };
+  } catch (err2) {
+    return { ok: false, error: err2.message, code: err2.code };
   }
 }
 
-module.exports = { getDb, getSqlNow, useMySQL, mysqlPool, testMySQLConnection, dbConfig };
+module.exports = {
+  getDb, getSqlNow, mysqlPool, testMySQLConnection, dbConfig, switchToSqlite,
+  get useMySQL() { return useMySQL; },
+};
