@@ -1159,6 +1159,7 @@
     .testimonial-avatar {
       width: 40px;
       height: 40px;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -1167,6 +1168,7 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      overflow: hidden;
       font-weight: 700;
       font-size: 13px;
     }
@@ -1177,6 +1179,10 @@
       object-fit: cover;
       border-radius: 50%;
       display: block;
+    }
+
+    .testimonial-avatar.has-image {
+      color: transparent;
     }
 
     /* Process */
@@ -3126,7 +3132,15 @@
       document.getElementById('greeting').textContent = 'Ciao, ' + (user.name ? user.name.split(' ')[0] : 'Utente') + '!';
       document.getElementById('userName').textContent = user.name || 'Utente';
       document.getElementById('userEmail').textContent = user.email || '';
-      document.getElementById('userAvatar').textContent = (user.name || 'U').charAt(0).toUpperCase();
+      const avatarEl = document.getElementById('userAvatar');
+      const avatarUrl = user.avatar || user.avatarUrl || user.photo || user.photoUrl;
+      if (avatarEl && avatarUrl) {
+        avatarEl.textContent = '';
+        avatarEl.style.backgroundImage = 'url(' + avatarUrl + ')';
+        avatarEl.classList.add('has-image');
+      } else if (avatarEl) {
+        avatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+      }
     }
 
     function logout() {
