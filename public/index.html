@@ -986,28 +986,7 @@
       overflow: hidden;
     }
 
-    .hero-glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-    }
 
-    .hero-glow-1 {
-      left: 25%;
-      top: 25%;
-      width: 500px;
-      height: 500px;
-      background: rgba(34, 211, 238, 0.08);
-    }
-
-    .hero-glow-2 {
-      right: 25%;
-      bottom: 25%;
-      width: 400px;
-      height: 400px;
-      background: rgba(245, 158, 11, 0.08);
-    }
 
     .hero-content {
       position: relative;
@@ -2719,7 +2698,6 @@
     .particles-bg canvas {
       width: 100% !important;
       height: 100% !important;
-      pointer-events: auto;
     }
 
     body {
@@ -2948,8 +2926,7 @@
 
   <!-- Hero -->
   <section class="hero">
-    <div class="hero-glow hero-glow-1 animate-breathe animate-morph"></div>
-    <div class="hero-glow hero-glow-2 animate-breathe animate-morph" style="animation-delay:-5s"></div>
+
     <div class="hero-content">
       <div class="hero-badge glass animate-fade-in">
         <span class="dot animate-pulse"></span>
@@ -3721,16 +3698,7 @@
       });
     });
 
-    // ===== PARALLAX GLOW EFFECT =====
-    const heroGlows = document.querySelectorAll('.hero-glow');
-    window.addEventListener('mousemove', (e) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 30;
-      const y = (e.clientY / window.innerHeight - 0.5) * 30;
-      heroGlows.forEach((glow, i) => {
-        const factor = i === 0 ? 1 : -0.7;
-        glow.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
-      });
-    });
+
 
     // ===== TYPE COUNTER ANIMATION =====
     const counters = document.querySelectorAll('.hero-stat-value');
@@ -3844,153 +3812,93 @@
       });
     })();
 
-    // ===== CURSOR GLOW (optional, can be disabled for performance) =====
-    const cursorGlow = document.createElement('div');
-    cursorGlow.style.cssText = 'position:fixed;width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,0.08) 0%,transparent 70%);pointer-events:none;z-index:-1;transform:translate(-50%,-50%);transition:opacity 0.3s;opacity:0;';
-    document.body.appendChild(cursorGlow);
-    document.addEventListener('mousemove', (e) => {
-      cursorGlow.style.left = e.clientX + 'px';
-      cursorGlow.style.top = e.clientY + 'px';
-      cursorGlow.style.opacity = '1';
-    });
-    document.addEventListener('mouseleave', () => { cursorGlow.style.opacity = '0'; });
   </script>
 
-  <!-- ===== OGL PARTICLES BACKGROUND ===== -->
-  <script type="module">
-    import { Renderer, Camera, Geometry, Program, Mesh } from 'https://cdn.jsdelivr.net/npm/ogl@1.0.11/dist/ogl.mjs';
-
-    const container = document.getElementById('particles-bg');
-    if (container) {
-      const mouse = { x: 0, y: 0 };
-
-      const renderer = new Renderer({ dpr: 1, depth: false, alpha: true });
-      const gl = renderer.gl;
-      container.appendChild(gl.canvas);
-      gl.clearColor(0, 0, 0, 0);
-
-      const camera = new Camera(gl, { fov: 15 });
-      camera.position.set(0, 0, 20);
+  <!-- ===== PARTICLES BACKGROUND (pure Canvas 2D) ===== -->
+  <script>
+    (function() {
+      var container = document.getElementById('particles-bg');
+      if (!container) return;
+      var canvas = document.createElement('canvas');
+      container.appendChild(canvas);
+      var ctx = canvas.getContext('2d');
+      var mouse = { x: 0.5, y: 0.5 };
+      var W, H;
 
       function resize() {
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        renderer.setSize(w, h);
-        camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * (window.devicePixelRatio || 1);
+        canvas.height = H * (window.devicePixelRatio || 1);
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
       }
       window.addEventListener('resize', resize);
       resize();
 
-      container.addEventListener('mousemove', (e) => {
-        const rect = container.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      window.addEventListener('mousemove', function(e) {
+        mouse.x = e.clientX / W;
+        mouse.y = e.clientY / H;
       });
 
-      const count = 200;
-      const positions = new Float32Array(count * 3);
-      const randoms = new Float32Array(count * 4);
-      const colors = new Float32Array(count * 3);
-      const palette = [[1, 1, 1]]; // white
-
-      for (let i = 0; i < count; i++) {
-        let x, y, z, len;
-        do {
-          x = Math.random() * 2 - 1;
-          y = Math.random() * 2 - 1;
-          z = Math.random() * 2 - 1;
-          len = x * x + y * y + z * z;
-        } while (len > 1 || len === 0);
-        const r = Math.cbrt(Math.random());
-        positions.set([x * r, y * r, z * r], i * 3);
-        randoms.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
-        const col = palette[Math.floor(Math.random() * palette.length)];
-        colors.set(col, i * 3);
+      var COUNT = 180;
+      var particles = [];
+      for (var i = 0; i < COUNT; i++) {
+        particles.push({
+          x: Math.random(),
+          y: Math.random(),
+          z: Math.random() * 0.8 + 0.2,
+          vx: (Math.random() - 0.5) * 0.0003,
+          vy: (Math.random() - 0.5) * 0.0003,
+          phase: Math.random() * Math.PI * 2,
+          speed: Math.random() * 0.3 + 0.1
+        });
       }
 
-      const geometry = new Geometry(gl, {
-        position: { size: 3, data: positions },
-        random: { size: 4, data: randoms },
-        color: { size: 3, data: colors },
-      });
+      function draw() {
+        requestAnimationFrame(draw);
+        ctx.clearRect(0, 0, W, H);
+        var t = performance.now() * 0.001;
+        var mx = mouse.x;
+        var my = mouse.y;
 
-      const vertex = `
-        attribute vec3 position;
-        attribute vec4 random;
-        attribute vec3 color;
-        uniform mat4 modelMatrix;
-        uniform mat4 viewMatrix;
-        uniform mat4 projectionMatrix;
-        uniform float uTime;
-        uniform float uSpread;
-        uniform float uBaseSize;
-        varying vec4 vRandom;
-        varying vec3 vColor;
-        void main() {
-          vRandom = random;
-          vColor = color;
-          vec3 pos = position * uSpread;
-          pos.z *= 10.0;
-          vec4 mPos = modelMatrix * vec4(pos, 1.0);
-          float t = uTime;
-          mPos.x += sin(t * random.z + 6.28 * random.w) * mix(0.1, 1.5, random.x);
-          mPos.y += sin(t * random.y + 6.28 * random.x) * mix(0.1, 1.5, random.w);
-          mPos.z += sin(t * random.w + 6.28 * random.y) * mix(0.1, 1.5, random.z);
-          vec4 mvPos = viewMatrix * mPos;
-          gl_PointSize = (uBaseSize * (1.0 + 1.0 * (random.x - 0.5))) / length(mvPos.xyz);
-          gl_Position = projectionMatrix * mvPos;
+        for (var i = 0; i < COUNT; i++) {
+          var p = particles[i];
+
+          // Organic floating motion
+          p.x += p.vx + Math.sin(t * p.speed + p.phase) * 0.0002;
+          p.y += p.vy + Math.cos(t * p.speed * 0.7 + p.phase) * 0.0002;
+
+          // Wrap around edges
+          if (p.x < -0.05) p.x = 1.05;
+          if (p.x > 1.05) p.x = -0.05;
+          if (p.y < -0.05) p.y = 1.05;
+          if (p.y > 1.05) p.y = -0.05;
+
+          // Mouse influence — particles drift away gently
+          var dx = p.x - mx;
+          var dy = p.y - my;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 0.15) {
+            var push = (0.15 - dist) * 0.008;
+            p.x += (dx / dist) * push;
+            p.y += (dy / dist) * push;
+          }
+
+          var screenX = p.x * W;
+          var screenY = p.y * H;
+          var radius = p.z * 2;
+          var alpha = p.z * 0.6 + 0.1;
+
+          ctx.beginPath();
+          ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+          ctx.fill();
         }
-      `;
-
-      const fragment = `
-        precision highp float;
-        uniform float uTime;
-        varying vec4 vRandom;
-        varying vec3 vColor;
-        void main() {
-          vec2 uv = gl_PointCoord.xy;
-          float d = length(uv - vec2(0.5));
-          if (d > 0.5) discard;
-          gl_FragColor = vec4(vColor + 0.2 * sin(uv.yxx + uTime + vRandom.y * 6.28), 1.0);
-        }
-      `;
-
-      const program = new Program(gl, {
-        vertex,
-        fragment,
-        uniforms: {
-          uTime: { value: 0 },
-          uSpread: { value: 10 },
-          uBaseSize: { value: 100 },
-        },
-        transparent: true,
-        depthTest: false,
-      });
-
-      const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
-
-      let lastTime = performance.now();
-      let elapsed = 0;
-
-      function update(t) {
-        requestAnimationFrame(update);
-        const delta = t - lastTime;
-        lastTime = t;
-        elapsed += delta * 0.1;
-
-        program.uniforms.uTime.value = elapsed * 0.001;
-
-        particles.position.x = -mouse.x * 1;
-        particles.position.y = -mouse.y * 1;
-
-        particles.rotation.x = Math.sin(elapsed * 0.0002) * 0.1;
-        particles.rotation.y = Math.cos(elapsed * 0.0005) * 0.15;
-        particles.rotation.z += 0.01 * 0.1;
-
-        renderer.render({ scene: particles, camera });
       }
-      requestAnimationFrame(update);
-    }
+      requestAnimationFrame(draw);
+    })();
   </script>
 </body>
 
