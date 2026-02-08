@@ -3,7 +3,8 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const { initDatabase } = require('./src/db/init');
+const { initDatabase, initMySQLDatabase } = require('./src/db/init');
+const { useMySQL, testMySQLConnection } = require('./src/config/database');
 const authRoutes = require('./src/routes/auth');
 const quotesRoutes = require('./src/routes/quotes');
 const usersRoutes = require('./src/routes/users');
@@ -28,7 +29,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 
-// ─── Health check: test connessione DB (per capire errori in produzione) ─
+// ─── Health check ────────────────────────────────────
 app.get('/api/health', async (req, res) => {
   try {
     const { getDb } = require('./src/config/database');
@@ -38,15 +39,8 @@ app.get('/api/health', async (req, res) => {
       ok: true,
       db: 'connected',
       dbTarget: useMySQL
-        ? {
-            type: 'mysql',
-            host: process.env.DB_HOST || 'localhost',
-            database: process.env.DB_NAME || null,
-          }
-        : {
-            type: 'sqlite',
-            path: process.env.DB_PATH || path.join(__dirname, 'data', 'database.sqlite'),
-          },
+        ? { type: 'mysql', host: process.env.DB_HOST, database: process.env.DB_NAME }
+        : { type: 'sqlite', path: path.join(__dirname, 'data', 'database.sqlite') },
     });
   } catch (err) {
     console.error('Health check error:', err);
@@ -60,19 +54,40 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Errore interno del server' });
 });
 
-// ─── Inizializza DB (solo SQLite; con MySQL usi database importato in phpMyAdmin) ─
-const useMySQL = !!(process.env.DB_HOST || process.env.DB_NAME);
-if (!useMySQL) {
-  initDatabase();
+// ─── Avvio server ────────────────────────────────────
+async function start() {
+  try {
+    if (useMySQL) {
+      console.log(`\n  🗄️  Connessione a MySQL (${process.env.DB_HOST})...`);
+      const test = await testMySQLConnection();
+      if (!test.ok) {
+        console.error(`  ❌ MySQL connection FAILED: ${test.error}`);
+        console.error(`     Host:     ${process.env.DB_HOST}`);
+        console.error(`     User:     ${process.env.DB_USER}`);
+        console.error(`     Database: ${process.env.DB_NAME}`);
+        console.error(`     Code:     ${test.code || 'N/A'}`);
+        process.exit(1);
+      }
+      console.log('  ✓  MySQL connesso');
+      await initMySQLDatabase();
+    } else {
+      initDatabase();
+    }
+
+    app.listen(PORT, () => {
+      console.log(`\n  🚀 WAG Services server attivo`);
+      console.log(`  ➜ Local:   http://localhost:${PORT}`);
+      console.log(`  ➜ API:     http://localhost:${PORT}/api`);
+      if (useMySQL) {
+        console.log(`  🗄️  DB:     MySQL (${process.env.DB_HOST}) → ${process.env.DB_NAME}\n`);
+      } else {
+        console.log(`  🗄️  DB:     SQLite (locale)\n`);
+      }
+    });
+  } catch (err) {
+    console.error('\n  ❌ Errore avvio server:', err.message);
+    process.exit(1);
+  }
 }
 
-app.listen(PORT, () => {
-  console.log(`\n  🚀 WAG Services server attivo`);
-  console.log(`  ➜ Local:   http://localhost:${PORT}`);
-  console.log(`  ➜ API:     http://localhost:${PORT}/api\n`);
-  if (useMySQL) {
-    console.log(`  🗄️  DB:     MySQL (${process.env.DB_HOST || 'localhost'}) ${process.env.DB_NAME || ''}`);
-  } else {
-    console.log(`  🗄️  DB:     SQLite (${process.env.DB_PATH || path.join(__dirname, 'data', 'database.sqlite')})`);
-  }
-});
+start();

@@ -7,8 +7,12 @@ let mysqlPool;
 
 if (useMySQL) {
   const mysql = require('mysql2/promise');
+  // 'localhost' su Hostinger risolve a IPv6 ::1 → forza 127.0.0.1
+  let dbHost = process.env.DB_HOST || '127.0.0.1';
+  if (dbHost === 'localhost') dbHost = '127.0.0.1';
+
   mysqlPool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
+    host: dbHost,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
@@ -65,4 +69,19 @@ function getDb() {
   };
 }
 
-module.exports = { getDb, getSqlNow };
+/**
+ * Testa la connessione MySQL. Restituisce { ok, error? }.
+ */
+async function testMySQLConnection() {
+  if (!useMySQL || !mysqlPool) return { ok: false, error: 'MySQL non configurato' };
+  try {
+    const conn = await mysqlPool.getConnection();
+    await conn.ping();
+    conn.release();
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message, code: err.code };
+  }
+}
+
+module.exports = { getDb, getSqlNow, useMySQL, mysqlPool, testMySQLConnection };
