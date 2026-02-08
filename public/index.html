@@ -2737,11 +2737,36 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
+      filter: blur(6px);
     }
 
     .particles-bg canvas {
       width: 100% !important;
       height: 100% !important;
+      transform: scale(1.02);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        background: #050509;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        inset: -20%;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 45%),
+          radial-gradient(circle at 80% 30%, rgba(139, 92, 246, 0.12), transparent 55%),
+          radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.06), transparent 50%);
+        filter: blur(28px);
+        opacity: 0.85;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .particles-bg {
+        display: none;
+      }
     }
 
     body {
