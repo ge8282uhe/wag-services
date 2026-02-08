@@ -50,8 +50,8 @@ nextApp.prepare().then(() => {
   app.get('/', (req, res) => nextApp.render(req, res, '/'));
 
   // ─── Next.js assets & fallback ─────────────────────
-  app.all('/_next/*', (req, res) => handle(req, res));
-  app.all('*', (req, res) => handle(req, res));
+  app.all(/^\/\_next\//, (req, res) => handle(req, res));
+  app.all(/.*/, (req, res) => handle(req, res));
 
   // ─── Error handler globale ─────────────────────────
   app.use((err, req, res, next) => {
