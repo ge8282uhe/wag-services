@@ -2836,190 +2836,102 @@
     }
 
     /* ===== FOLDER COMPONENT ===== */
-    .folder-anchor {
-      display: flex;
-      justify-content: center;
-      margin-top: 12rem;
-      margin-bottom: 2.5rem;
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 3rem;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    @media (max-width: 768px) {
-      .folder-anchor {
-        margin-top: 6rem;
-      }
-
-      .folder-anchor .folder {
-        transform: scale(1.2) !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .folder-anchor .folder {
-        transform: scale(1) !important;
+    @media (max-width: 640px) {
+      .showcase-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
 
-    .folder-wrapper {
+    @media (max-width: 420px) {
+      .showcase-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .showcase-card {
+      aspect-ratio: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
-      cursor: pointer;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    .folder-hint {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      transition: opacity 0.3s;
-      margin-top: 0.75rem;
-    }
-
-    .folder {
-      position: relative;
-      transition: transform 0.2s ease-in;
-    }
-
-    .folder:hover {
-      transform: translateY(-8px);
-    }
-
-    .folder:hover .folder__front {
-      transform: skew(15deg) scaleY(0.6);
-    }
-
-    .folder:hover .folder__front--right {
-      transform: skew(-15deg) scaleY(0.6);
-    }
-
-    .folder:hover .paper-link {
-      transform: translate(-50%, 0%);
-    }
-
-    .folder__back {
-      position: relative;
-      width: 100px;
-      height: 80px;
-      background: var(--folder-back);
-      border-radius: 0 10px 10px 10px;
-    }
-
-    .folder__back::after {
-      position: absolute;
-      z-index: 0;
-      bottom: 98%;
-      left: 0;
-      content: '';
-      width: 30px;
-      height: 10px;
-      background: var(--folder-back);
-      border-radius: 5px 5px 0 0;
-    }
-
-
-    .paper-link {
-      position: absolute;
-      z-index: 2;
-      bottom: 10%;
-      left: 50%;
-      transform: translate(calc(-50% + var(--mx, 0px)), calc(10% + var(--my, 0px)));
-      width: 70%;
-      height: 80%;
-      background: #e6e6e6;
-      border-radius: 10px;
-      transition: all 0.3s ease-in-out;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      color: #111111;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
       text-decoration: none;
-      pointer-events: none;
+      color: var(--text-primary);
+      transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
     }
 
-
-    .paper-link:nth-child(2) {
-      background: #f2f2f2;
-      width: 80%;
-      height: 70%;
-    }
-
-    .paper-link:nth-child(3) {
-      background: #ffffff;
-      width: 90%;
-      height: 60%;
-    }
-
-    .paper-link img {
-      width: 28px;
-      height: 28px;
-      opacity: 0.85;
-      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
-    }
-
-    .folder__front {
+    .showcase-card::before {
+      content: '';
       position: absolute;
-      z-index: 3;
-      width: 100%;
-      height: 100%;
-      background: var(--folder-color);
-      border-radius: 5px 10px 10px 10px;
-      transform-origin: bottom;
-      transition: all 0.3s ease-in-out;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(168,85,247,0.06), rgba(124,58,237,0.03));
+      opacity: 0;
+      transition: opacity 0.2s;
     }
 
-    .folder__front--right {
+    .showcase-card:hover {
+      background: var(--bg-glass-hover);
+      border-color: rgba(168,85,247,0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(168, 85, 247, 0.12);
+    }
+
+    .showcase-card:hover::before {
+      opacity: 1;
+    }
+
+    .showcase-card-num {
+      font-size: 10px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-tertiary);
       position: absolute;
-      z-index: 3;
-      width: 100%;
-      height: 100%;
-      background: var(--folder-color);
-      border-radius: 5px 10px 10px 10px;
-      transform-origin: bottom;
-      transition: all 0.3s ease-in-out;
+      top: 0.6rem;
+      left: 0.75rem;
     }
 
-    /* Open state */
-    .folder.open {
-      transform: translateY(-8px);
+    .showcase-card-arrow {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.75rem;
+      color: var(--text-tertiary);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
     }
 
-    .folder.open .folder__front {
-      transform: skew(15deg) scaleY(0.6);
+    .showcase-card:hover .showcase-card-arrow {
+      opacity: 1;
+      color: var(--brand-start);
+      transform: translate(1px, -1px);
     }
 
-    .folder.open .folder__front--right {
-      transform: skew(-15deg) scaleY(0.6);
+    .showcase-card-name {
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text-secondary);
+      line-height: 1.35;
+      transition: color 0.2s;
     }
 
-
-    .folder.open .paper-link:nth-child(1) {
-      transform: translate(-120%, -70%) rotateZ(-15deg);
-      pointer-events: auto;
-    }
-
-    .folder.open .paper-link:nth-child(2) {
-      transform: translate(10%, -70%) rotateZ(15deg);
-      height: 80%;
-      pointer-events: auto;
-    }
-
-    .folder.open .paper-link:nth-child(3) {
-      transform: translate(-50%, -100%) rotateZ(5deg);
-      height: 80%;
-      pointer-events: auto;
-    }
-
-    .folder.open .paper-link:nth-child(1):hover {
-      transform: translate(-120%, -70%) rotateZ(-15deg) scale(1.1);
-    }
-
-    .folder.open .paper-link:nth-child(2):hover {
-      transform: translate(10%, -70%) rotateZ(15deg) scale(1.1);
-    }
-
-    .folder.open .paper-link:nth-child(3):hover {
-      transform: translate(-50%, -100%) rotateZ(5deg) scale(1.1);
+    .showcase-card:hover .showcase-card-name {
+      color: var(--text-primary);
     }
   </style>
 </head>
@@ -3185,35 +3097,49 @@
   </section>
 
   <!-- Portfolio -->
-  <section id="lavori" class="section">
+  <section id="lavori" class="section" style="padding-bottom:3rem">
     <div class="container">
       <div class="text-center">
         <span class="label-sm gradient-text">Lavori selezionati</span>
         <h2 class="heading-xl mt-3">I nostri migliori<br><span class="gradient-text">progetti</span></h2>
       </div>
-      <!-- Folder Component -->
-      <div class="folder-anchor">
-        <div class="folder-wrapper" id="folderToggle">
-          <div class="folder" id="folderEl" style="--folder-color:#8b5cf6;--folder-back:#7237e0;transform:scale(1.5)">
-            <div class="folder__back">
-              <a class="paper-link" href="https://kreativaproject.netlify.app" target="_blank" rel="noopener noreferrer"
-                aria-label="Visita progetto Kreativa">
-                <img src="portfolio-icons/kreativa-favicon.png" alt="Kreativa Project" loading="lazy">
-              </a>
-              <a class="paper-link" href="https://ladolcevita-gh3oiy5c.manus.space/" target="_blank" rel="noopener noreferrer"
-                aria-label="Visita progetto La Dolce Vita">
-                <img src="portfolio-icons/ladolcevita-favicon.svg" alt="La Dolce Vita" loading="lazy">
-              </a>
-              <a class="paper-link" href="https://wagtechstore.netlify.app" target="_blank" rel="noopener noreferrer"
-                aria-label="Visita WAG Tech Store">
-                <img src="portfolio-icons/wagtechstore-favicon.svg" alt="WAG Tech Store" loading="lazy">
-              </a>
-              <div class="folder__front"></div>
-              <div class="folder__front--right"></div>
-            </div>
-          </div>
-          <p class="folder-hint">clicca per aprire</p>
-        </div>
+      <!-- Showcase Grid -->
+      <div class="showcase-grid">
+        <a class="showcase-card" href="https://blasitraslog.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">01</span>
+          <span class="showcase-card-name">Blasi Traslog</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a class="showcase-card" href="https://vecchioristrutturazioni.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">02</span>
+          <span class="showcase-card-name">Vecchio Ristrutturazioni</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a class="showcase-card" href="https://wagfusionrestaurant.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">03</span>
+          <span class="showcase-card-name">WAG Fusion Restaurant</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a class="showcase-card" href="https://yogage.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">04</span>
+          <span class="showcase-card-name">Yogage</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a class="showcase-card" href="https://gecostmob.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">05</span>
+          <span class="showcase-card-name">GeCost Mob</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a class="showcase-card" href="https://internodanza.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">06</span>
+          <span class="showcase-card-name">Interno Danza</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a class="showcase-card" href="https://opru.netlify.app" target="_blank" rel="noopener noreferrer">
+          <span class="showcase-card-num">07</span>
+          <span class="showcase-card-name">Opru</span>
+          <svg class="showcase-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
       </div>
 
 
@@ -3850,39 +3776,7 @@
       }
     }
 
-    // ===== FOLDER COMPONENT =====
-    (() => {
-      const folderToggle = document.getElementById('folderToggle');
-      const folderEl = document.getElementById('folderEl');
-      const hint = folderToggle.querySelector('.folder-hint');
-      const papers = folderEl.querySelectorAll('.paper-link');
-      let isOpen = false;
 
-      folderToggle.addEventListener('click', (event) => {
-        if (event.target.closest('.paper-link')) return;
-        isOpen = !isOpen;
-        folderEl.classList.toggle('open', isOpen);
-        hint.textContent = isOpen ? 'clicca per chiudere' : 'clicca per aprire';
-        if (!isOpen) {
-          papers.forEach(p => { p.style.setProperty('--mx', '0px'); p.style.setProperty('--my', '0px'); });
-        }
-      });
-
-      papers.forEach((paper, i) => {
-        paper.addEventListener('mousemove', (e) => {
-          if (!isOpen) return;
-          const rect = paper.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2;
-          const cy = rect.top + rect.height / 2;
-          paper.style.setProperty('--mx', ((e.clientX - cx) * 0.15) + 'px');
-          paper.style.setProperty('--my', ((e.clientY - cy) * 0.15) + 'px');
-        });
-        paper.addEventListener('mouseleave', () => {
-          paper.style.setProperty('--mx', '0px');
-          paper.style.setProperty('--my', '0px');
-        });
-      });
-    })();
 
   </script>
 
